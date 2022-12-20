@@ -12,7 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ## R Markdown
 ```{r}
 #Load libraries
-suppressPackageStartupMessages({
 library(here)
 library(BiocStyle)
 library(dplyr)
@@ -31,42 +30,81 @@ library(dittoSeq)
 library(cellhashR)
 library(RColorBrewer)
 library(demuxmix)
-})
 ```
 
 #BAL data set
+
+Each batch was processed in two separate captures. We perform all the demultiplexing methods on a per-capture level before then recombining into batch level objects for later analysis.
 
 ##Data loading and reduction
 
 Load in matrices
 ```{r}
-batch1_counts <- read.csv(here("data", "batch1_hto_counts.csv"), check.names = FALSE, row.names = 1)
-batch2_counts <- read.csv(here("data", "batch2_hto_counts.csv"), check.names = FALSE, row.names = 1)
-batch3_counts <- read.csv(here("data", "batch3_hto_counts.csv"), check.names = FALSE, row.names = 1)
+batch1_c1_counts <- read.csv(here("data", "batch1_c1_hto_counts.csv"), check.names = FALSE, row.names = 1)
+batch1_c2_counts <- read.csv(here("data", "batch1_c2_hto_counts.csv"), check.names = FALSE, row.names = 1)
+
+batch2_c1_counts <- read.csv(here("data", "batch2_c1_hto_counts.csv"), check.names = FALSE, row.names = 1)
+batch2_c2_counts <- read.csv(here("data", "batch2_c2_hto_counts.csv"), check.names = FALSE, row.names = 1)
+
+batch3_c1_counts <- read.csv(here("data", "batch3_c1_hto_counts.csv"), check.names = FALSE, row.names = 1)
+batch3_c2_counts <- read.csv(here("data", "batch3_c2_hto_counts.csv"), check.names = FALSE, row.names = 1)
 ```
 ```{r}
-batch1_donors <- read.csv(here("data", "batch1_donors"), row.names = 1)
-batch2_donors <- read.csv(here("data", "batch2_donors"), row.names = 1)
-batch3_donors <- read.csv(here("data", "batch3_donors"), row.names = 1)
+batch1_c1_donors <- read.csv(here("data", "batch1_c1_donors.csv"), row.names = 1)
+batch1_c2_donors <- read.csv(here("data", "batch1_c2_donors.csv"), row.names = 1)
+
+batch2_c1_donors <- read.csv(here("data", "batch2_c1_donors.csv"), row.names = 1)
+batch2_c2_donors <- read.csv(here("data", "batch2_c2_donors.csv"), row.names = 1)
+
+batch3_c1_donors <- read.csv(here("data", "batch3_c1_donors.csv"), row.names = 1)
+batch3_c2_donors <- read.csv(here("data", "batch3_c2_donors.csv"), row.names = 1)
 ```
 
 Make Seurat objects
 ```{r}
-seu1 <- CreateSeuratObject(counts = batch1_counts, assay = "HTO")
-seu2 <- CreateSeuratObject(counts = batch2_counts, assay = "HTO")
-seu3 <- CreateSeuratObject(counts = batch3_counts, assay = "HTO")
+seu1_c1 <- CreateSeuratObject(counts = batch1_c1_counts, assay = "HTO")
+seu1_c2 <- CreateSeuratObject(counts = batch1_c2_counts, assay = "HTO")
+
+seu2_c1 <- CreateSeuratObject(counts = batch2_c1_counts, assay = "HTO")
+seu2_c2 <- CreateSeuratObject(counts = batch2_c2_counts, assay = "HTO")
+
+seu3_c1 <- CreateSeuratObject(counts = batch3_c1_counts, assay = "HTO")
+seu3_c2 <- CreateSeuratObject(counts = batch3_c2_counts, assay = "HTO")
 ```
 ```{r}
-seu1$Barcode <- colnames(seu1)
-seu2$Barcode <- colnames(seu2)
-seu3$Barcode <- colnames(seu3)
+seu1_c1$Barcode <- colnames(seu1_c1)
+seu1_c1$capture <- "capture_1"
+seu1_c2$Barcode <- colnames(seu1_c2)
+seu1_c2$capture <- "capture_2"
+
+seu2_c1$Barcode <- colnames(seu2_c1)
+seu2_c1$capture <- "capture_1"
+seu2_c2$Barcode <- colnames(seu2_c2)
+seu2_c2$capture <- "capture_2"
+
+seu3_c1$Barcode <- colnames(seu3_c1)
+seu3_c1$capture <- "capture_1"
+seu3_c2$Barcode <- colnames(seu3_c2)
+seu3_c2$capture <- "capture_2"
 ```
 
 Add genetic donor information to Seurat objects
 ```{r}
-seu1$genetic_donor <- batch1_donors
-seu2$genetic_donor <- batch2_donors
-seu3$genetic_donor <- batch3_donors
+seu1_c1$genetic_donor <- batch1_c1_donors
+seu1_c2$genetic_donor <- batch1_c2_donors
+
+seu2_c1$genetic_donor <- batch2_c1_donors
+seu2_c2$genetic_donor <- batch2_c2_donors
+
+seu3_c1$genetic_donor <- batch3_c1_donors
+seu3_c2$genetic_donor <- batch3_c2_donors
+```
+
+Merge into batch-level objects
+```{r}
+seu1 <- merge(seu1_c1, seu1_c2)
+seu2 <- merge(seu2_c1, seu2_c2)
+seu3 <- merge(seu3_c1, seu3_c2)
 ```
 
 For each of the batches need a list of the HTOs and the associated genetic donors.
@@ -117,6 +155,49 @@ seu3 <- RunPCA(seu3, features = rownames(seu3), approx = FALSE, verbose = FALSE)
 seu3 <- RunTSNE(seu3, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
 ```
 
+Same for individual captures
+```{r}
+DefaultAssay(seu1_c1) <- "HTO"
+seu1_c1 <- NormalizeData(seu1_c1, assay = "HTO", normalization.method = "CLR")
+seu1_c1 <- ScaleData(seu1_c1, features = rownames(seu1_c1),
+    verbose = FALSE)
+seu1_c1 <- RunPCA(seu1_c1, features = rownames(seu1_c1), approx = FALSE, verbose = FALSE)
+seu1_c1 <- RunTSNE(seu1_c1, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+DefaultAssay(seu1_c2) <- "HTO"
+seu1_c2 <- NormalizeData(seu1_c2, assay = "HTO", normalization.method = "CLR")
+seu1_c2 <- ScaleData(seu1_c2, features = rownames(seu1_c2),
+    verbose = FALSE)
+seu1_c2 <- RunPCA(seu1_c2, features = rownames(seu1_c2), approx = FALSE, verbose = FALSE)
+seu1_c2 <- RunTSNE(seu1_c2, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+seu2_c1 <- NormalizeData(seu2_c1, assay = "HTO", normalization.method = "CLR")
+seu2_c1 <- ScaleData(seu2_c1, features = rownames(seu2_c1),
+    verbose = FALSE)
+seu2_c1 <- RunPCA(seu2_c1, features = rownames(seu2_c1), approx = FALSE, verbose = FALSE)
+seu2_c1 <- RunTSNE(seu2_c1, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+DefaultAssay(seu2_c2) <- "HTO"
+seu2_c2 <- NormalizeData(seu2_c2, assay = "HTO", normalization.method = "CLR")
+seu2_c2 <- ScaleData(seu2_c2, features = rownames(seu2_c2),
+    verbose = FALSE)
+seu2_c2 <- RunPCA(seu2_c2, features = rownames(seu2_c2), approx = FALSE, verbose = FALSE)
+seu2_c2 <- RunTSNE(seu2_c2, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+seu3_c1 <- NormalizeData(seu3_c1, assay = "HTO", normalization.method = "CLR")
+seu3_c1 <- ScaleData(seu3_c1, features = rownames(seu3_c1),
+    verbose = FALSE)
+seu3_c1 <- RunPCA(seu3_c1, features = rownames(seu3_c1), approx = FALSE, verbose = FALSE)
+seu3_c1 <- RunTSNE(seu3_c1, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+DefaultAssay(seu3_c2) <- "HTO"
+seu3_c2 <- NormalizeData(seu3_c2, assay = "HTO", normalization.method = "CLR")
+seu3_c2 <- ScaleData(seu3_c2, features = rownames(seu3_c2),
+    verbose = FALSE)
+seu3_c2 <- RunPCA(seu3_c2, features = rownames(seu3_c2), approx = FALSE, verbose = FALSE)
+seu3_c2 <- RunTSNE(seu3_c2, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+```
+
 ##QC plots
 
 Density plots
@@ -147,7 +228,6 @@ df2 %>%
   ggtitle("Batch 2") +
   geom_density(adjust = 5) +
   facet_wrap(~forcats::fct_relevel(name, "donor A", "donor B", "donor C", "donor D", "donor E", "donor F", "donor G", "donor H"),
-                                   #"Human-HTO-6", "Human-HTO-7", "Human-HTO-9", "Human-HTO-10", "Human-HTO-12", "Human-HTO-13", "Human-HTO-14", "Human-HTO-15"), 
              scales = "fixed", ncol = 4) +
   theme(axis.title.x = element_blank(),
         axis.text.x = element_blank(),
@@ -164,13 +244,114 @@ df3 %>%
   ggtitle("Batch 3") +
    geom_density(adjust = 5) +
   facet_wrap(~forcats::fct_relevel(name, "donor A", "donor B", "donor C", "donor D", "donor E", "donor F", "donor G", "donor H"),
-                                   #"Human-HTO-6", "Human-HTO-7", "Human-HTO-9", "Human-HTO-10", "Human-HTO-12", "Human-HTO-13", "Human-HTO-14", "Human-HTO-15"), 
              scales = "fixed", ncol = 4) +
-  theme(#axis.title.y = element_blank(),
-        #axis.text.y = element_blank(),
-        axis.ticks = element_blank()) -> p3
+  theme(axis.ticks = element_blank()) -> p3
 
-(p1 / p2 / p3) + plot_annotation(tag_levels = 'a')
+#(p1 / p2 / p3) + plot_annotation(tag_levels = 'a')
+```
+
+tSNE plots
+```{r}
+p4 <- DimPlot(seu1, group.by = "genetic_donor") +
+  ggtitle("Batch 1") + 
+  NoLegend() +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank(),
+        plot.margin = margin(0,0,0,0,"cm"))
+
+p5 <- DimPlot(seu2, group.by = "genetic_donor") +
+  ggtitle("Batch 2") +
+  xlab("") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(),
+        plot.margin = margin(0,0,0,0,"cm"))
+p6 <- DimPlot(seu3, group.by = "genetic_donor") +
+  ggtitle("Batch 3") + 
+  NoLegend() +
+  ylab("") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.y = element_blank(),
+        plot.margin = margin(0,0,0,0,"cm"))
+```
+
+```{r}
+(((p1 / p2 / p3) | (p4 / p5 / p6)) + plot_annotation(tag_levels = 'a')) & theme(plot.title = element_text(face = "plain", size = 10), 
+                                                                               plot.tag = element_text(face = 'plain'))
+```
+```{r}
+ggsave("QC_plots.png",
+       plot = (((p1 / p2 / p3) | (p4 / p5 / p6)) + plot_annotation(tag_levels = 'a')) & theme(plot.title = element_text(face = "plain", size = 10), 
+                                                                               plot.tag = element_text(face = 'plain')),
+       device = "png",
+       path = here("figures"),
+       width = 10, height = 9,
+       units = "in",
+       dpi = 300)
+```
+
+
+```{r}
+p4 <- DimPlot(seu1_c1, group.by = "genetic_donor") +
+  ggtitle("Batch 1 (capture 1)") + 
+  NoLegend() +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank(),
+        plot.margin = margin(0,0,0,0,"cm"))
+p5 <- DimPlot(seu2_c1, group.by = "genetic_donor") +
+  ggtitle("Batch 2 (capture 1)") +
+  xlab("") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(),
+        plot.margin = margin(0,0,0,0,"cm"))
+p6 <- DimPlot(seu3_c1, group.by = "genetic_donor") +
+  ggtitle("Batch 3 (capture 1)") + 
+  NoLegend() +
+  ylab("") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.y = element_blank(),
+        plot.margin = margin(0,0,0,0,"cm"))
+
+p7 <- DimPlot(seu1_c2, group.by = "genetic_donor") +
+  ggtitle("Batch 1 (capture 2)") + 
+  NoLegend() +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank(),
+        plot.margin = margin(0,0,0,0,"cm"))
+p8 <- DimPlot(seu2_c2, group.by = "genetic_donor") +
+  ggtitle("Batch 2 (capture 2)") +
+  xlab("") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(),
+        plot.margin = margin(0,0,0,0,"cm"))
+p9 <- DimPlot(seu3_c2, group.by = "genetic_donor") +
+  ggtitle("Batch 3 (capture 2)") + 
+  NoLegend() +
+  ylab("") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.y = element_blank(),
+        plot.margin = margin(0,0,0,0,"cm"))
+```
+```{r}
+(p1 / p2 / p3) | (p4 / p5 / p6) | (p7 / p8 / p9)
+
 ```
 
 ##Hashtag-based demultiplexing. 
@@ -198,26 +379,44 @@ create_hashedDrops_factor <- function(seurat_object, confident.min = 2,
 
 Making factors with best parameters
 ```{r}
-seu1$hashedDrops_calls <- create_hashedDrops_factor(seu1, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
-seu2$hashedDrops_calls <- create_hashedDrops_factor(seu2, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
-seu3$hashedDrops_calls <- create_hashedDrops_factor(seu3, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+seu1_c1$hashedDrops_calls <- create_hashedDrops_factor(seu1_c1, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+seu1_c2$hashedDrops_calls <- create_hashedDrops_factor(seu1_c2, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+
+seu2_c1$hashedDrops_calls <- create_hashedDrops_factor(seu2_c1, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+seu2_c2$hashedDrops_calls <- create_hashedDrops_factor(seu2_c2, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+
+seu3_c1$hashedDrops_calls <- create_hashedDrops_factor(seu3_c1, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+seu3_c2$hashedDrops_calls <- create_hashedDrops_factor(seu3_c2, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
 ```
 
 Now with default parameters
 ```{r}
-seu1$hashedDrops_default_calls <- create_hashedDrops_factor(seu1)
-seu2$hashedDrops_default_calls <- create_hashedDrops_factor(seu2)
-seu3$hashedDrops_default_calls <- create_hashedDrops_factor(seu3)
+seu1_c1$hashedDrops_default_calls <- create_hashedDrops_factor(seu1_c1)
+seu1_c2$hashedDrops_default_calls <- create_hashedDrops_factor(seu1_c2)
+
+seu2_c1$hashedDrops_default_calls <- create_hashedDrops_factor(seu2_c1)
+seu2_c2$hashedDrops_default_calls <- create_hashedDrops_factor(seu2_c2)
+
+seu3_c1$hashedDrops_default_calls <- create_hashedDrops_factor(seu3_c1)
+seu3_c2$hashedDrops_default_calls <- create_hashedDrops_factor(seu3_c2)
 ```
 
 ###HTODemux
 ```{r}
-HDmux <- HTODemux(seu1)
-seu1$HTODemux_calls <- HDmux$hash.ID
-HDmux <- HTODemux(seu2)
-seu2$HTODemux_calls <- HDmux$hash.ID
-HDmux <- HTODemux(seu3)
-seu3$HTODemux_calls <- HDmux$hash.ID
+HDmux <- HTODemux(seu1_c1)
+seu1_c1$HTODemux_calls <- HDmux$hash.ID
+HDmux <- HTODemux(seu1_c2)
+seu1_c2$HTODemux_calls <- HDmux$hash.ID
+
+HDmux <- HTODemux(seu2_c1)
+seu2_c1$HTODemux_calls <- HDmux$hash.ID
+HDmux <- HTODemux(seu2_c2)
+seu2_c2$HTODemux_calls <- HDmux$hash.ID
+
+HDmux <- HTODemux(seu3_c1)
+seu3_c1$HTODemux_calls <- HDmux$hash.ID
+HDmux <- HTODemux(seu3_c2)
+seu3_c2$HTODemux_calls <- HDmux$hash.ID
 ```
 
 ###GMM-Demux
@@ -247,9 +446,14 @@ create_gmm_demux_factor <- function(seu, GMM_path, hto_list) {
 
 Need to write transpose of counts matrices to .csv files to run GMM-Demux on command line. 
 ```{r}
-write.csv(t(as.matrix(batch1_counts)), here("data", "GMM_Demux", "batch1_hto_counts_transpose.csv"))
-write.csv(t(as.matrix(batch2_counts)), here("data", "GMM_Demux", "batch2_hto_counts_transpose.csv"))
-write.csv(t(as.matrix(batch3_counts)), here("data", "GMM_Demux", "batch3_hto_counts_transpose.csv"))
+write.csv(t(as.matrix(batch1_c1_counts)), here("data", "GMM-Demux", "batch1_c1_hto_counts_transpose.csv"))
+write.csv(t(as.matrix(batch1_c2_counts)), here("data", "GMM-Demux", "batch1_c2_hto_counts_transpose.csv"))
+
+write.csv(t(as.matrix(batch2_c1_counts)), here("data", "GMM-Demux", "batch2_c1_hto_counts_transpose.csv"))
+write.csv(t(as.matrix(batch2_c2_counts)), here("data", "GMM-Demux", "batch2_c2_hto_counts_transpose.csv"))
+
+write.csv(t(as.matrix(batch3_c1_counts)), here("data", "GMM-Demux", "batch3_c1_hto_counts_transpose.csv"))
+write.csv(t(as.matrix(batch3_c2_counts)), here("data", "GMM-Demux", "batch3_c2_hto_counts_transpose.csv"))
 ```
 
 See script for running GMM-Demux
@@ -257,56 +461,74 @@ See script for running GMM-Demux
 Add to objects
 ```{r}
 #Batch 1
-seu1$GMMDemux_calls <- create_gmm_demux_factor(seu1, here("data", "GMM_Demux", "gmm_out_batch1", "full_report_t_0.8"), HTO_list_batch1) 
-seu2$GMMDemux_calls <- create_gmm_demux_factor(seu2, here("data", "GMM_Demux", "gmm_out_batch5", "full_report_t_0.8"), HTO_list_batch2) 
-seu3$GMMDemux_calls <- create_gmm_demux_factor(seu3, here("data", "GMM_Demux", "gmm_out_batch3", "full_report_t_0.8"), HTO_list_batch3) 
+seu1_c1$GMMDemux_calls <- create_gmm_demux_factor(seu1_c1, here("data", "GMM-Demux", "gmm_out_batch1_c1", "full_report"), HTO_list_batch1) 
+seu1_c2$GMMDemux_calls <- create_gmm_demux_factor(seu1_c2, here("data", "GMM-Demux", "gmm_out_batch1_c2", "full_report"), HTO_list_batch1) 
+
+#Batch 2
+seu2_c1$GMMDemux_calls <- create_gmm_demux_factor(seu2_c1, here("data", "GMM-Demux", "gmm_out_batch2_c1", "full_report"), HTO_list_batch2) 
+seu2_c2$GMMDemux_calls <- create_gmm_demux_factor(seu2_c2, here("data", "GMM-Demux", "gmm_out_batch2_c2", "full_report"), HTO_list_batch2) 
+
+#Batch 3
+seu3_c1$GMMDemux_calls <- create_gmm_demux_factor(seu3_c1, here("data", "GMM-Demux", "gmm_out_batch3_c1", "full_report"), HTO_list_batch3) 
+seu3_c2$GMMDemux_calls <- create_gmm_demux_factor(seu3_c2, here("data", "GMM-Demux", "gmm_out_batch3_c2", "full_report"), HTO_list_batch3) 
 ```
 
 ###deMULTIplex
 
 Next is deMULTIplex, using the Seurat wrapper function MULTIseqDemux for this
 ```{r}
-seu1$deMULTIplex_calls <- MULTIseqDemux(seu1, autoThresh = TRUE)$MULTI_ID
-seu2$deMULTIplex_calls <- MULTIseqDemux(seu2, autoThresh = TRUE)$MULTI_ID
-seu3$deMULTIplex_calls <- MULTIseqDemux(seu3, autoThresh = TRUE)$MULTI_ID
+seu1_c1$deMULTIplex_calls <- MULTIseqDemux(seu1_c1, autoThresh = TRUE)$MULTI_ID
+seu1_c2$deMULTIplex_calls <- MULTIseqDemux(seu1_c2, autoThresh = TRUE)$MULTI_ID
+
+seu2_c1$deMULTIplex_calls <- MULTIseqDemux(seu2_c1, autoThresh = TRUE)$MULTI_ID
+seu2_c2$deMULTIplex_calls <- MULTIseqDemux(seu2_c2, autoThresh = TRUE)$MULTI_ID
+
+seu3_c1$deMULTIplex_calls <- MULTIseqDemux(seu3_c1, autoThresh = TRUE)$MULTI_ID
+seu3_c2$deMULTIplex_calls <- MULTIseqDemux(seu3_c2, autoThresh = TRUE)$MULTI_ID
 ```
 
 ###BFF
 Finally cellhashR's BFF_raw and BFF_cluster methods.
 Need to run this on the raw counts matrix
 ```{r}
-batch1_hto_counts <- seu1[["HTO"]]@counts
-batch2_hto_counts <- seu2[["HTO"]]@counts
-batch3_hto_counts <- seu3[["HTO"]]@counts
+batch1_c1_hto_counts <- seu1_c1[["HTO"]]@counts
+batch1_c2_hto_counts <- seu1_c2[["HTO"]]@counts
+
+batch2_c1_hto_counts <- seu2_c1[["HTO"]]@counts
+batch2_c2_hto_counts <- seu2_c2[["HTO"]]@counts
+
+batch3_c1_hto_counts <- seu3_c1[["HTO"]]@counts
+batch3_c2_hto_counts <- seu3_c2[["HTO"]]@counts
 ```
 
 ```{r}
-cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = batch1_hto_counts, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
+cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = batch1_c1_hto_counts, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
+seu1_c1$BFF_raw_calls <- cellhashR_calls$bff_raw
+seu1_c1$BFF_cluster_calls <- cellhashR_calls$bff_cluster
+
+cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = batch1_c2_hto_counts, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
+seu1_c2$BFF_raw_calls <- cellhashR_calls$bff_raw
+seu1_c2$BFF_cluster_calls <- cellhashR_calls$bff_cluster
 ```
 
 ```{r}
-seu1$BFF_raw_calls <- cellhashR_calls$bff_raw
-seu1$BFF_cluster_calls <- cellhashR_calls$bff_cluster
+cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = batch2_c1_hto_counts, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
+seu2_c1$BFF_raw_calls <- cellhashR_calls$bff_raw
+seu2_c1$BFF_cluster_calls <- cellhashR_calls$bff_cluster
+
+cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = batch2_c2_hto_counts, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
+seu2_c2$BFF_raw_calls <- cellhashR_calls$bff_raw
+seu2_c2$BFF_cluster_calls <- cellhashR_calls$bff_cluster
 ```
 
 ```{r}
-cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = batch2_hto_counts, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
-```
+cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = batch3_c1_hto_counts, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
+seu3_c1$BFF_raw_calls <- cellhashR_calls$bff_raw
+seu3_c1$BFF_cluster_calls <- cellhashR_calls$bff_cluster
 
-```{r}
-seu2$BFF_raw_calls <- cellhashR_calls$bff_raw
-#seu2$BFF_cluster_calls <- cellhashR_calls$bff_cluster 
-#Note! BFF_cluster does not work at all on batch 2. 
-seu2$BFF_cluster_calls <- as.factor(rep("Negative", ncol(seu2)))
-```
-
-```{r}
-cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = batch3_hto_counts, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
-```
-
-```{r}
-seu3$BFF_raw_calls <- cellhashR_calls$bff_raw
-seu3$BFF_cluster_calls <- cellhashR_calls$bff_cluster
+cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = batch3_c2_hto_counts, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
+seu3_c2$BFF_raw_calls <- cellhashR_calls$bff_raw
+seu3_c2$BFF_cluster_calls <- cellhashR_calls$bff_cluster
 ```
 
 ###demuxmix
@@ -328,9 +550,21 @@ demuxmix_calls_consistent <- function(seurat_object, model = "naive", hto_list) 
 }
 ```
 ```{r}
-seu1$demuxmix_calls <- demuxmix_calls_consistent(seu1, hto_list = HTO_list_batch1)
-seu2$demuxmix_calls <- demuxmix_calls_consistent(seu2, hto_list = HTO_list_batch2)
-seu3$demuxmix_calls <- demuxmix_calls_consistent(seu3, hto_list = HTO_list_batch3)
+seu1_c1$demuxmix_calls <- demuxmix_calls_consistent(seu1_c1, hto_list = HTO_list_batch1)
+seu1_c2$demuxmix_calls <- demuxmix_calls_consistent(seu1_c2, hto_list = HTO_list_batch1)
+
+seu2_c1$demuxmix_calls <- demuxmix_calls_consistent(seu2_c1, hto_list = HTO_list_batch2)
+seu2_c2$demuxmix_calls <- demuxmix_calls_consistent(seu2_c2, hto_list = HTO_list_batch2)
+
+seu3_c1$demuxmix_calls <- demuxmix_calls_consistent(seu3_c1, hto_list = HTO_list_batch3)
+seu3_c2$demuxmix_calls <- demuxmix_calls_consistent(seu3_c2, hto_list = HTO_list_batch3)
+```
+
+Merge the captures back into the batches
+```{r}
+seu1 <- merge(seu1_c1, seu1_c2)
+seu2 <- merge(seu2_c1, seu2_c2)
+seu3 <- merge(seu3_c1, seu3_c2)
 ```
 
 Add a factor for batches
@@ -413,6 +647,16 @@ p9 <- dittoBarPlot(seu, var = "demuxmix_calls_category", group.by = "Batch") + N
 
 (p1 + p2 + p3) / (p4 + p5 + p6) / (p7 + p8 + p9)
 ```
+```{r}
+ggsave("category_fractions.png",
+       plot = (p1 + p2 + p3) / (p4 + p5 + p6) / (p7 + p8 + p9),
+       device = "png",
+       path = here("figures"),
+       width = 10, height = 9,
+       units = "in",
+       dpi = 300)
+```
+
 
 ###Calculating F-score
 
@@ -426,8 +670,10 @@ calculate_HTO_fscore <- function(seurat_object, donor_hto_list, method) {
     fn <- sum(calls != HTO & donor_hto_list[seurat_object$genetic_donor] == HTO) #False negative rate
     f <- c(f, tp / (tp + 0.5 * (fp + fn)))
   }
-  f <- c(f, median(f)) #Add median F score
-  names(f) <- c(donor_hto_list, "Median")
+#  f <- c(f, median(f)) #Add median F score
+  f <- c(f, mean(f)) #Add mean F score
+
+  names(f) <- c(donor_hto_list, "Average")
   
   return(f)
 }
@@ -469,7 +715,7 @@ Fscore_demuxmix_batch3 <- calculate_HTO_fscore(seu3, donor_list_batch3[1:8], "de
 
 Put it all together for visualisation
 ```{r}
-Fscore_matrix_batch1 <- data.frame("HTO" = c(HTO_list_batch1[1:8], "Median"),
+Fscore_matrix_batch1 <- data.frame("HTO" = c(HTO_list_batch1[1:8], "Mean"),#"Median"),
                             "hashedDrops" = Fscore_hashedDrops_batch1,
                             "hashedDrops_default" = Fscore_hashedDrops_default_batch1,
                             "HTODemux" = Fscore_HTODemux_batch1,
@@ -484,7 +730,7 @@ Fscore_matrix_batch1 <- data.frame("HTO" = c(HTO_list_batch1[1:8], "Median"),
                names_to = "method",
                values_to = "Fscore")
 
-Fscore_matrix_batch2 <- data.frame("HTO" = c(HTO_list_batch2[1:8], "Median"),
+Fscore_matrix_batch2 <- data.frame("HTO" = c(HTO_list_batch2[1:8], "Mean"),#"Median"),
                             "hashedDrops" = Fscore_hashedDrops_batch2,
                             "hashedDrops_default" = Fscore_hashedDrops_default_batch2,
                             "HTODemux" = Fscore_HTODemux_batch2,
@@ -499,7 +745,7 @@ Fscore_matrix_batch2 <- data.frame("HTO" = c(HTO_list_batch2[1:8], "Median"),
                names_to = "method",
                values_to = "Fscore")
 
-Fscore_matrix_batch3 <- data.frame("HTO" = c(HTO_list_batch3[1:8], "Median"),
+Fscore_matrix_batch3 <- data.frame("HTO" = c(HTO_list_batch3[1:8], "Mean"),# "Median"),
                             "hashedDrops" = Fscore_hashedDrops_batch3,
                             "hashedDrops_default" = Fscore_hashedDrops_default_batch3,
                             "HTODemux" = Fscore_HTODemux_batch3,
@@ -519,7 +765,7 @@ Fscore_matrix_batch3 <- data.frame("HTO" = c(HTO_list_batch3[1:8], "Median"),
 plotcolours <- c("Black", brewer.pal(9, "Blues")[2:9])#, "deeppink", "deeppink3")
 
 p1 <- ggplot(data = Fscore_matrix_batch1) +
-  geom_bar(aes(x = method, y = Fscore, fill = forcats::fct_relevel(HTO, "Median", "Human-HTO-1","Human-HTO-2", "Human-HTO-3", "Human-HTO-4", "Human-HTO-5", "Human-HTO-6", "Human-HTO-7", "Human-HTO-8")),
+  geom_bar(aes(x = method, y = Fscore, fill = forcats::fct_relevel(HTO, "Mean", "Human-HTO-1","Human-HTO-2", "Human-HTO-3", "Human-HTO-4", "Human-HTO-5", "Human-HTO-6", "Human-HTO-7", "Human-HTO-8")),
            position = "dodge", stat = "identity") +
   scale_fill_manual(values = plotcolours) + 
   ylim(0, 1) +
@@ -531,7 +777,7 @@ p1 <- ggplot(data = Fscore_matrix_batch1) +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 
 p2 <- ggplot(data = Fscore_matrix_batch2) +
-  geom_bar(aes(x = method, y = Fscore, fill = forcats::fct_relevel(HTO, "Median", "Human-HTO-6","Human-HTO-7", "Human-HTO-9", "Human-HTO-10", "Human-HTO-12", "Human-HTO-13", "Human-HTO-14", "Human-HTO-15")),
+  geom_bar(aes(x = method, y = Fscore, fill = forcats::fct_relevel(HTO, "Mean", "Human-HTO-6","Human-HTO-7", "Human-HTO-9", "Human-HTO-10", "Human-HTO-12", "Human-HTO-13", "Human-HTO-14", "Human-HTO-15")),
            position = "dodge", stat = "identity") +
   scale_fill_manual(values = plotcolours) + 
   ylim(0, 1) +
@@ -544,7 +790,7 @@ p2 <- ggplot(data = Fscore_matrix_batch2) +
 
 
 p3 <- ggplot(data = Fscore_matrix_batch3) +
-  geom_bar(aes(x = method, y = Fscore, fill = forcats::fct_relevel(HTO, "Median", "Human-HTO-6","Human-HTO-7", "Human-HTO-9", "Human-HTO-10", "Human-HTO-12", "Human-HTO-13", "Human-HTO-14", "Human-HTO-15")),
+  geom_bar(aes(x = method, y = Fscore, fill = forcats::fct_relevel(HTO, "Mean", "Human-HTO-6","Human-HTO-7", "Human-HTO-9", "Human-HTO-10", "Human-HTO-12", "Human-HTO-13", "Human-HTO-14", "Human-HTO-15")),
            position = "dodge", stat = "identity") +
     scale_fill_manual(values = plotcolours) + 
   ylim(0, 1) +
@@ -552,7 +798,6 @@ p3 <- ggplot(data = Fscore_matrix_batch3) +
   theme(axis.text = element_text(size = 12)) + 
   labs(fill = "HTO") +
   labs(title = "Batch 3") +
-  #coord_flip() +
   facet_wrap(~method, ncol = 4, scales = "free_x") +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 ```
@@ -561,6 +806,23 @@ p1
 p2
 p3
 ```
+```{r}
+ggsave("fscores.png",
+       plot = p1 / p2 / p3,
+       device = "png",
+       path = here("figures"),
+       width = 10, height = 9,
+       units = "in",
+       dpi = 300)
+```
+
+```{r}
+Fscore_matrix_batch1[Fscore_matrix_batch1$HTO == "Mean", ]
+Fscore_matrix_batch2[Fscore_matrix_batch2$HTO == "Mean", ]
+Fscore_matrix_batch3[Fscore_matrix_batch3$HTO == "Mean", ]
+```
+
+
 
 ###Doublets to singlets
 
@@ -682,49 +944,71 @@ p3 <- ggplot(batch3_doublet_assignments) +
 
 p1 / p2 / p3 
 ```
+```{r}
+ggsave("doublet_assignments.png",
+       plot = p1 /p2 /p3,
+       device = "png",
+       path = here("figures"),
+       width = 10, height = 9,
+       units = "in",
+       dpi = 300)
+```
+
 
 #Cell line data.
 
 ##Data loading and reduction.
 
 ```{r}
-lmo_counts <- read.csv(here("data", "lmo_counts.csv"), check.names = FALSE, row.names = 1)
-lmo_donors <- read.csv(here("data", "lmo_donors.csv"), row.names = 1)
+lmo_counts_c1 <- read.csv(here("data", "lmo_counts_capture1.csv"), check.names = FALSE, row.names = 1)
+lmo_counts_c2 <- read.csv(here("data", "lmo_counts_capture2.csv"), check.names = FALSE, row.names = 1)
+lmo_counts_c3 <- read.csv(here("data", "lmo_counts_capture3.csv"), check.names = FALSE, row.names = 1)
+
+lmo_donors_c1 <- read.csv(here("data", "lmo_donors_capture1.csv"), row.names = 1)
+lmo_donors_c2 <- read.csv(here("data", "lmo_donors_capture2.csv"), row.names = 1)
+lmo_donors_c3 <- read.csv(here("data", "lmo_donors_capture3.csv"), row.names = 1)
 ```
 
 ```{r}
-seu_lmo <- CreateSeuratObject(counts = lmo_counts, assay = "HTO")
+seu_lmo_c1 <- CreateSeuratObject(counts = lmo_counts_c1, assay = "HTO")
+seu_lmo_c2 <- CreateSeuratObject(counts = lmo_counts_c2, assay = "HTO")
+seu_lmo_c3 <- CreateSeuratObject(counts = lmo_counts_c3, assay = "HTO")
 ```
 ```{r}
-seu_lmo$Barcode <- colnames(seu_lmo)
+seu_lmo_c1$Barcode <- colnames(seu_lmo_c1)
+seu_lmo_c2$Barcode <- colnames(seu_lmo_c2)
+seu_lmo_c3$Barcode <- colnames(seu_lmo_c3)
 ```
 
 Add genetic donor information to Seurat objects
 ```{r}
-seu_lmo$genetic_donor <- lmo_donors
+seu_lmo_c1$genetic_donor <- lmo_donors_c1
+seu_lmo_c2$genetic_donor <- lmo_donors_c2
+seu_lmo_c3$genetic_donor <- lmo_donors_c3
 ```
 
+Merge together for QC comparison
+```{r}
+seu_lmo <- merge(seu_lmo_c1, c(seu_lmo_c2, seu_lmo_c3))
+```
+
+Useful lists
 ```{r}
 LMO_list <- c("BC1", "BC2", "BC3", "Doublet", "Negative")
 donor_LMO_list <- list("donor_A" = "BC1", "donor_B" = "BC2", "donor_C" = "BC3", "Doublet" = "Doublet", "Negative" = "Negative")
 LMO_donor_list <- list("BC1" = "donor_A", "BC2" = "donor_B", "BC3" = "donor_C", "Doublet" = "Doublet", "Negative" = "Negative")
 ```
 
+##QC plots 
 
 ```{r}
 DefaultAssay(seu_lmo) <- "HTO"
-
 seu_lmo <- NormalizeData(seu_lmo, assay = "HTO", normalization.method = "CLR")
 seu_lmo <- ScaleData(seu_lmo, features = rownames(seu_lmo),
     verbose = FALSE)
 seu_lmo <- RunPCA(seu_lmo, features = rownames(seu_lmo), approx = FALSE, verbose = FALSE)
 seu_lmo <- RunTSNE(seu_lmo, dims = 1:3, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
 ```
-
-```{r}
-DimPlot(seu_lmo, group.by = "genetic_donor")
-```
-
 
 ```{r}
 df <- as.data.frame(t(seu_lmo[["HTO"]]@counts))
@@ -735,12 +1019,247 @@ df %>%
   ggplot(aes(x = logged)) +
   xlab("log(counts)") +
   xlim(0.1,8) +
-  ggtitle("Batch 1") +
   geom_density(adjust = 3) +
   facet_wrap(~name, scales = "fixed", ncol = 3)  -> p1
 
 p1
 ```
+
+```{r}
+p2 <- DimPlot(seu_lmo, group.by = "genetic_donor") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        plot.title = element_blank())
+
+p2
+```
+
+```{r}
+ggsave("LMO_QC.png",
+       plot = (p1 | p2) + plot_annotation(tag_levels = 'a') & theme(plot.title = element_text(face = "plain", size = 10), 
+                                                                               plot.tag = element_text(face = 'plain')),
+       device = "png",
+       path = here("figures"),
+       width = 10, height = 4,
+       units = "in",
+       dpi = 300)
+```
+
+
+###hashedDrops
+
+Making factors with best parameters
+```{r}
+seu_lmo_c1$hashedDrops_calls <- create_hashedDrops_factor(seu_lmo_c1, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+seu_lmo_c2$hashedDrops_calls <- create_hashedDrops_factor(seu_lmo_c2, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+seu_lmo_c3$hashedDrops_calls <- create_hashedDrops_factor(seu_lmo_c3, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+```
+
+Now with default parameters
+```{r}
+seu_lmo_c1$hashedDrops_default_calls <- create_hashedDrops_factor(seu_lmo_c1)
+seu_lmo_c2$hashedDrops_default_calls <- create_hashedDrops_factor(seu_lmo_c2)
+seu_lmo_c3$hashedDrops_default_calls <- create_hashedDrops_factor(seu_lmo_c3)
+```
+
+###HTODemux
+```{r}
+HDmux <- HTODemux(seu_lmo_c1)
+seu_lmo_c1$HTODemux_calls <- HDmux$hash.ID
+HDmux <- HTODemux(seu_lmo_c2)
+seu_lmo_c2$HTODemux_calls <- HDmux$hash.ID
+HDmux <- HTODemux(seu_lmo_c3)
+seu_lmo_c3$HTODemux_calls <- HDmux$hash.ID
+```
+
+###GMM-Demux
+
+Need to write transpose of counts matrices to .csv files to run GMM-Demux on command line. 
+```{r}
+write.csv(t(as.matrix(lmo_counts_c1)), here("data", "GMM-Demux", "lmo_counts_capture1_transpose.csv"))
+write.csv(t(as.matrix(lmo_counts_c2)), here("data", "GMM-Demux", "lmo_counts_capture2_transpose.csv"))
+write.csv(t(as.matrix(lmo_counts_c3)), here("data", "GMM-Demux", "lmo_counts_capture3_transpose.csv"))
+```
+
+See script for running GMM-Demux
+
+Add to objects
+```{r}
+seu_lmo_c1$GMMDemux_calls <- create_gmm_demux_factor(seu_lmo_c1, here("data", "GMM-Demux", "gmm_out_LMO_c1", "full_report"), LMO_list) 
+seu_lmo_c2$GMMDemux_calls <- create_gmm_demux_factor(seu_lmo_c2, here("data", "GMM-Demux", "gmm_out_LMO_c2", "full_report"), LMO_list) 
+seu_lmo_c3$GMMDemux_calls <- create_gmm_demux_factor(seu_lmo_c3, here("data", "GMM-Demux", "gmm_out_LMO_c3", "full_report"), LMO_list) 
+```
+
+###deMULTIplex
+
+Next is deMULTIplex, using the Seurat wrapper function MULTIseqDemux for this
+```{r}
+seu_lmo_c1$deMULTIplex_calls <- MULTIseqDemux(seu_lmo_c1, autoThresh = TRUE)$MULTI_ID
+seu_lmo_c2$deMULTIplex_calls <- MULTIseqDemux(seu_lmo_c2, autoThresh = TRUE)$MULTI_ID
+seu_lmo_c3$deMULTIplex_calls <- MULTIseqDemux(seu_lmo_c3, autoThresh = TRUE)$MULTI_ID
+```
+
+###BFF
+Finally cellhashR's BFF_raw and BFF_cluster methods.
+Need to run this on the raw counts matrix
+```{r}
+lmo_counts_c1 <- seu_lmo_c1[["HTO"]]@counts
+lmo_counts_c2 <- seu_lmo_c2[["HTO"]]@counts
+lmo_counts_c3 <- seu_lmo_c3[["HTO"]]@counts
+```
+
+```{r}
+cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = lmo_counts_c1, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
+seu_lmo_c1$BFF_raw_calls <- cellhashR_calls$bff_raw
+seu_lmo_c1$BFF_cluster_calls <- cellhashR_calls$bff_cluster
+
+cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = lmo_counts_c2, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
+seu_lmo_c2$BFF_raw_calls <- cellhashR_calls$bff_raw
+seu_lmo_c2$BFF_cluster_calls <- cellhashR_calls$bff_cluster
+
+cellhashR_calls <- GenerateCellHashingCalls(barcodeMatrix = lmo_counts_c3, methods = c("bff_raw", "bff_cluster"), doTSNE = FALSE, doHeatmap = FALSE)
+seu_lmo_c3$BFF_raw_calls <- cellhashR_calls$bff_raw
+seu_lmo_c3$BFF_cluster_calls <- cellhashR_calls$bff_cluster
+```
+
+###demuxmix
+
+```{r}
+seu_lmo_c1$demuxmix_calls <- demuxmix_calls_consistent(seu_lmo_c1, hto_list = LMO_list)
+seu_lmo_c2$demuxmix_calls <- demuxmix_calls_consistent(seu_lmo_c2, hto_list = LMO_list)
+seu_lmo_c3$demuxmix_calls <- demuxmix_calls_consistent(seu_lmo_c3, hto_list = LMO_list)
+```
+
+Re-merge back into single seurat object
+```{r}
+seu_lmo_c1$capture <- "capture 1"
+seu_lmo_c2$capture <- "capture 2"
+seu_lmo_c3$capture <- "capture 3"
+
+seu_lmo <- merge(seu_lmo_c1, c(seu_lmo_c2, seu_lmo_c3))
+```
+
+##Compute F-scores
+
+Compare F scores from the methods.
+```{r}
+Fscore_hashedDrops <- calculate_HTO_fscore(seu_lmo, donor_LMO_list[1:3], "hashedDrops_calls")
+Fscore_hashedDrops_default <- calculate_HTO_fscore(seu_lmo, donor_LMO_list[1:3], "hashedDrops_default_calls")
+Fscore_HTODemux <- calculate_HTO_fscore(seu_lmo, donor_LMO_list[1:3], "HTODemux_calls")
+Fscore_GMMDemux <- calculate_HTO_fscore(seu_lmo, donor_LMO_list[1:3], "GMMDemux_calls")
+Fscore_deMULTIplex <- calculate_HTO_fscore(seu_lmo, donor_LMO_list[1:3], "deMULTIplex_calls")
+Fscore_BFF_raw <- calculate_HTO_fscore(seu_lmo, donor_LMO_list[1:3], "BFF_raw_calls")
+Fscore_BFF_cluster <- calculate_HTO_fscore(seu_lmo, donor_LMO_list[1:3], "BFF_cluster_calls")
+Fscore_demuxmix <- calculate_HTO_fscore(seu_lmo, donor_LMO_list[1:3], "demuxmix_calls")
+```
+
+
+```{r}
+Fscore_matrix <- data.frame("LMO" = c(LMO_list[1:3], "Mean"),
+                            "hashedDrops" = Fscore_hashedDrops,
+                            "hashedDrops_default" = Fscore_hashedDrops_default,
+                            "HTODemux" = Fscore_HTODemux,
+                            "GMM_Demux" = Fscore_GMMDemux,
+                            "deMULTIplex" = Fscore_deMULTIplex,
+                            "BFF_raw" = Fscore_BFF_raw,
+                            "BFF_cluster" = Fscore_BFF_cluster,
+                            "demuxmix" = Fscore_demuxmix)
+
+Fscore_matrix
+
+#Removing average information
+Fscore_matrix = Fscore_matrix[1:3,]
+
+```
+
+
+```{r}
+Fscore_matrix %>% 
+  pivot_longer(cols = c("hashedDrops", "hashedDrops_default", "HTODemux", "GMM_Demux", "deMULTIplex", "BFF_raw", "BFF_cluster", "demuxmix"),
+               names_to = "method",
+               values_to = "Fscore") -> Fscore_matrix
+```
+
+```{r}
+library(RColorBrewer)
+plotcolours <- c(brewer.pal(5, "Blues")[3:5])
+
+p1 <- ggplot(data = Fscore_matrix) +
+  geom_bar(aes(x = method, y = Fscore, fill = forcats::fct_relevel(LMO, "BC1", "BC2", "BC3")),
+           position = "dodge", stat = "identity") +
+  scale_fill_manual(values = plotcolours) + 
+  ylim(0, 1) +
+  xlab("") + 
+  theme(axis.text = element_text(size = 12)) + 
+  labs(fill = "LMO") +
+  facet_wrap(~method, ncol = 4, scales = "free_x") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) 
+
+p1
+```
+
+Doublet assignments
+```{r}
+doublets <- seu_lmo[, seu_lmo$genetic_donor == "Doublet"]
+doublet_doublet <- NULL
+doublet_negative <- NULL
+doublet_singlet <- NULL
+
+for (method in method_calls) {
+  doublet_doublet <- c(doublet_doublet, sum(seu_lmo$genetic_donor == "Doublet" & seu_lmo[[method]] == "Doublet") / sum(seu_lmo$genetic_donor == "Doublet"))
+  doublet_negative <- c(doublet_negative, sum(seu_lmo$genetic_donor == "Doublet" & seu_lmo[[method]] == "Negative") / sum(seu_lmo$genetic_donor == "Doublet"))
+  doublet_singlet <- c(doublet_singlet, sum(seu_lmo$genetic_donor == "Doublet" & Reduce("|", lapply(LMO_list[1:3], function(x) seu_lmo[[method]] == x))) / sum(seu_lmo$genetic_donor == "Doublet"))
+}
+
+names(doublet_doublet) <- method_calls
+names(doublet_negative) <- method_calls
+names(doublet_singlet) <- method_calls
+```
+
+```{r}
+doublet_assignments <- data.frame("method" = c("hashedDrops", "hashedDrops (default)", "HTODemux",
+                                                      "GMM-Demux", "deMULTIplex", "BFF_raw",
+                                                      "BFF_cluster", "demuxmix"),
+                            "Doublets" = doublet_doublet,
+                            "Negative" = doublet_negative,
+                            "Singlet" = doublet_singlet) %>%
+  pivot_longer(cols = c("Doublets", "Negative", "Singlet"), 
+               names_to = "assignment",
+               values_to = "fraction")
+```
+
+
+```{r}
+p2 <- ggplot(doublet_assignments) + 
+  geom_bar(aes(x = method, y = fraction, fill = assignment),
+           position = "dodge", stat = "identity") +
+  ylim(0, 1) +
+  facet_wrap(~method, ncol = 4, scales = "free_x") +
+  scale_fill_manual(values = doublet_colours) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank(),
+        plot.margin = margin(0,0,0,0,"cm")) 
+
+p2
+```
+
+```{r}
+ggsave("cell_line_figures.png",
+       plot = (p1 / p2) + plot_annotation(tag_levels = 'a'),
+       device = "png",
+       path = here("figures"),
+       width = 10, height = 8,
+       units = "in",
+       dpi = 300)
+```
+
+
+
+
+
+
+
 
 
 
