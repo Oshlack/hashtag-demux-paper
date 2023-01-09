@@ -1019,7 +1019,7 @@ df %>%
   ggplot(aes(x = logged)) +
   xlab("log(counts)") +
   xlim(0.1,8) +
-  geom_density(adjust = 3) +
+  geom_density(adjust = 2) +
   facet_wrap(~name, scales = "fixed", ncol = 3)  -> p1
 
 p1
@@ -1254,6 +1254,27 @@ ggsave("cell_line_figures.png",
        dpi = 300)
 ```
 
+How many droplets in the third peak?
+```{r}
+df <- as.data.frame(t(seu_lmo[["HTO"]]@counts))
+colnames(df) <- gsub("_", " ", LMO_donor_list[colnames(df)])
+df %>%
+  pivot_longer(cols = starts_with("donor")) %>%
+  mutate(logged = log10(value + 1)) %>%
+  ggplot(aes(x = logged)) +
+  xlab("log10(counts)") +
+  xlim(0.1,4) +
+  geom_density(adjust = 2) +
+  facet_wrap(~name, scales = "fixed", ncol = 3)  -> p1
+
+p1
+```
+```{r}
+table(seu_lmo$genetic_donor)
+sum(log10(seu_lmo[["HTO"]]@counts[1,]) > 2)
+sum(log10(seu_lmo[["HTO"]]@counts[2,]) > 2.5)
+sum(log10(seu_lmo[["HTO"]]@counts[3,]) > 2.5)
+```
 
 
 
