@@ -7,9 +7,9 @@ The raw counts data and vireo assignments for the BAL and cell line data sets ar
 
 The code and analysis results can be viewed at the [analysis webpage](https://oshlacklab.com/hashtag-demux-paper/). 
 
-The code in this analysis is covered by the [MIT license](https://choosealicense.com/licenses/mit/ "MIT License") and the written content is covered by a [Creative Commons CC-BY](https://choosealicense.com/licenses/cc-by-4.0/ "CC-BY License") license.
+The code in this analysis is covered by the [MIT license](https://choosealicense.com/licenses/mit/ "MIT License") and the written content and data are covered by a [Creative Commons CC-BY](https://choosealicense.com/licenses/cc-by-4.0/ "CC-BY License") license.
 
-The associated publication and the data sets used are covered by their respective licenses and usage agreements. Please refer to those sources for details.
+The associated publication is covered by its respective license and usage agreement. Please refer to that source for details.
 
 A [workflowr](https://workflowr.github.io/workflowr) project.
 
