@@ -8,7 +8,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-"Benchmarking single-cell hashtag oligo demultiplexing methods"
+Benchmarking single-cell hashtag oligo demultiplexing methods
 =======
 https://www.biorxiv.org/content/10.1101/2022.12.20.521313v2
 
