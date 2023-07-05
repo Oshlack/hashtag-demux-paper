@@ -8,17 +8,12 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+"Benchmarking single-cell hashtag oligo demultiplexing methods"
 =======
-title: "Benchmarking single-cell hashtag oligo demultiplexing methods"
-description: https://www.biorxiv.org/content/10.1101/2022.12.20.521313v2
-author:
-  - name: George Howitt
+https://www.biorxiv.org/content/10.1101/2022.12.20.521313v2
+
 date: "`r Sys.Date()`"
-site: workflowr::wflow_site
-output:
-  html_document: 
-    theme: cosmo
+
 ---
 
 Follow the links below to view the different parts of the analysis. 
