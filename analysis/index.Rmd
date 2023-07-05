@@ -9,3 +9,37 @@ editor_options:
 ---
 
 Welcome to my research website.
+=======
+title: "Benchmarking single-cell hashtag oligo demultiplexing methods"
+description: https://www.biorxiv.org/content/10.1101/2022.12.20.521313v2
+author:
+  - name: George Howitt
+date: "`r Sys.Date()`"
+site: workflowr::wflow_site
+output:
+  html_document: 
+    theme: cosmo
+---
+
+Follow the links below to view the different parts of the analysis. 
+
+
+# Abstract {-}
+Sample multiplexing is often used to reduce cost and limit batch effects in single-cell RNA sequencing (scRNAseq)experiments. A commonly used multiplexing technique involves tagging cells prior to pooling with a hashtag oligo (HTO) that can be sequenced along with the cells’ RNA to determine their sample of origin. Several tools have been developed to demultiplex HTO sequencing data and assign cells to samples. In this study, we critically assess the performance of seven HTO demultiplexing tools: hashedDrops, HTODemux, GMM-Demux, demuxmix, deMULTIplex, BFF and HashSolo. The comparison uses data sets where each sample has also
+been demultiplexed using genetic variants from the RNA, enabling comparison of HTO demultiplexing techniques
+against complementary data from the genetic “ground truth”. We find that all methods perform similarly where
+HTO labelling is of high quality, but methods that assume a bimodal counts distribution perform poorly on lower quality data. We also provide heuristic approaches for assessing the quality of HTO counts in a scRNA-seq experiment.
+
+
+# Authors {-}
+George Howitt, Yuzhou Feng, Lucas Tobar, Dane Vassiliadis, Peter Hickey, Mark A. Dawson Sarath Ranganathan Shivanthan Shanthikumar Melanie Neeland Jovana Maksimovic and Alicia Oshlack
+
+ 
+# Analysis Overview {-}
+
+
+Analysis of each data set is included in a separate notebook
+    a) [BAL data set](BAL_analysis.html)
+    b) [Ovarian tumour data set](solid_tissue_analysis.html)
+    c) [Cell line data set](cell_line_analysis.html)
+    
