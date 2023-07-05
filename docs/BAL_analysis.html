@@ -1,0 +1,2579 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="George Howitt" />
+
+<meta name="date" content="2023-05-22" />
+
+<title>BAL data analysis</title>
+
+<script src="site_libs/header-attrs-2.21/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">hashtag-demux-paper</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">BAL data analysis</h1>
+<h4 class="author">George Howitt</h4>
+<h4 class="date">2023-05-22</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2023-07-05
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>hashtag-demux-paper/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20230522code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20230522)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20230522code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20230522)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongabsolute">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>File paths:</strong> absolute </a>
+</p>
+</div>
+<div id="strongFilepathsstrongabsolute" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Using absolute paths to the files within your workflowr project makes it
+difficult for you and others to run your code on a different machine.
+Change the absolute path(s) below to the suggested relative path(s) to
+make your code more reproducible.
+</p>
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th style="text-align:left;">
+absolute
+</th>
+<th style="text-align:left;">
+relative
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+~/singlecell/hashtag-demux-paper/data/BAL_data/batch1_c1_hashsolo.csv
+</td>
+<td style="text-align:left;">
+data/BAL_data/batch1_c1_hashsolo.csv
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+~/singlecell/hashtag-demux-paper/data/BAL_data/batch1_c2_hashsolo.csv
+</td>
+<td style="text-align:left;">
+data/BAL_data/batch1_c2_hashsolo.csv
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+~/singlecell/hashtag-demux-paper/data/BAL_data/batch2_c1_hashsolo.csv
+</td>
+<td style="text-align:left;">
+data/BAL_data/batch2_c1_hashsolo.csv
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+~/singlecell/hashtag-demux-paper/data/BAL_data/batch2_c2_hashsolo.csv
+</td>
+<td style="text-align:left;">
+data/BAL_data/batch2_c2_hashsolo.csv
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+~/singlecell/hashtag-demux-paper/data/BAL_data/batch3_c1_hashsolo.csv
+</td>
+<td style="text-align:left;">
+data/BAL_data/batch3_c1_hashsolo.csv
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+~/singlecell/hashtag-demux-paper/data/BAL_data/batch3_c2_hashsolo.csv
+</td>
+<td style="text-align:left;">
+data/BAL_data/batch3_c2_hashsolo.csv
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomOshlackhashtagdemuxpapertreeb8cab8bc57b24acd63ae0c9fc5584deaf4a89125targetblankb8cab8ba">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/Oshlack/hashtag-demux-paper/tree/b8cab8bc57b24acd63ae0c9fc5584deaf4a89125" target="_blank">b8cab8b</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomOshlackhashtagdemuxpapertreeb8cab8bc57b24acd63ae0c9fc5584deaf4a89125targetblankb8cab8ba"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/Oshlack/hashtag-demux-paper/tree/b8cab8bc57b24acd63ae0c9fc5584deaf4a89125" target="_blank">b8cab8b</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    data/BAL_data/.DS_Store
+
+Untracked files:
+    Untracked:  .ipynb_checkpoints/
+    Untracked:  Dear editors.docx
+    Untracked:  NAR.cls
+    Untracked:  analysis/Fscore_MCC_comparison.Rmd
+    Untracked:  analysis/cell_line_analysis.Rmd
+    Untracked:  analysis/gmm_demux.Rmd
+    Untracked:  analysis/hashsolo_prep.Rmd
+    Untracked:  analysis/run_GMM_demux_BAL.sh
+    Untracked:  analysis/solid_tissue_analysis.Rmd
+    Untracked:  cover_letter.docx
+    Untracked:  data/BAL_data/batch1_all_methods.SEU.rds
+    Untracked:  data/BAL_data/batch1_c1_donors_original.csv
+    Untracked:  data/BAL_data/batch1_c1_hto_counts_original.csv
+    Untracked:  data/BAL_data/batch1_c1_relabelled.SEU.rds
+    Untracked:  data/BAL_data/batch1_c2_donors_original.csv
+    Untracked:  data/BAL_data/batch1_c2_hto_counts_original.csv
+    Untracked:  data/BAL_data/batch1_c2_relabelled.SEU.rds
+    Untracked:  data/BAL_data/batch1_relabelled.SEU.rds
+    Untracked:  data/BAL_data/batch2_all_methods.SEU.rds
+    Untracked:  data/BAL_data/batch2_c1_donors_original.csv
+    Untracked:  data/BAL_data/batch2_c1_hto_counts_original.csv
+    Untracked:  data/BAL_data/batch2_c1_relabelled.SEU.rds
+    Untracked:  data/BAL_data/batch2_c2_donors_original.csv
+    Untracked:  data/BAL_data/batch2_c2_hto_counts_original.csv
+    Untracked:  data/BAL_data/batch2_c2_relabelled.SEU.rds
+    Untracked:  data/BAL_data/batch2_relabelled.SEU.rds
+    Untracked:  data/BAL_data/batch3_all_methods.SEU.rds
+    Untracked:  data/BAL_data/batch3_c1_donors_original.csv
+    Untracked:  data/BAL_data/batch3_c1_hto_counts_original.csv
+    Untracked:  data/BAL_data/batch3_c1_relabelled.SEU.rds
+    Untracked:  data/BAL_data/batch3_c2_donors_original.csv
+    Untracked:  data/BAL_data/batch3_c2_hto_counts_original.csv
+    Untracked:  data/BAL_data/batch3_c2_relabelled.SEU.rds
+    Untracked:  data/BAL_data/batch3_relabelled.SEU.rds
+    Untracked:  data/adata/batch1_c1_hashsolo.csv
+    Untracked:  data/adata/batch1_c1_hs_n10_d10.csv
+    Untracked:  data/adata/batch1_c1_hs_n10_d20.csv
+    Untracked:  data/adata/batch1_c1_hs_n10_d30.csv
+    Untracked:  data/adata/batch1_c1_hs_n1_d10.csv
+    Untracked:  data/adata/batch1_c1_hs_n1_d20.csv
+    Untracked:  data/adata/batch1_c1_hs_n1_d30.csv
+    Untracked:  data/adata/batch1_c1_hs_n5_d10.csv
+    Untracked:  data/adata/batch1_c1_hs_n5_d30.csv
+    Untracked:  data/adata/batch1_c2_hashsolo.csv
+    Untracked:  data/adata/batch1_c2_hs_n10_d10.csv
+    Untracked:  data/adata/batch1_c2_hs_n10_d20.csv
+    Untracked:  data/adata/batch1_c2_hs_n10_d30.csv
+    Untracked:  data/adata/batch1_c2_hs_n1_d10.csv
+    Untracked:  data/adata/batch1_c2_hs_n1_d20.csv
+    Untracked:  data/adata/batch1_c2_hs_n1_d30.csv
+    Untracked:  data/adata/batch1_c2_hs_n5_d10.csv
+    Untracked:  data/adata/batch1_c2_hs_n5_d30.csv
+    Untracked:  data/adata/batch2_c1_hashsolo.csv
+    Untracked:  data/adata/batch2_c1_hs_n10_d10.csv
+    Untracked:  data/adata/batch2_c1_hs_n10_d20.csv
+    Untracked:  data/adata/batch2_c1_hs_n10_d30.csv
+    Untracked:  data/adata/batch2_c1_hs_n1_d10.csv
+    Untracked:  data/adata/batch2_c1_hs_n1_d20.csv
+    Untracked:  data/adata/batch2_c1_hs_n1_d30.csv
+    Untracked:  data/adata/batch2_c1_hs_n5_d10.csv
+    Untracked:  data/adata/batch2_c1_hs_n5_d30.csv
+    Untracked:  data/adata/batch2_c2_hashsolo.csv
+    Untracked:  data/adata/batch2_c2_hs_n10_d10.csv
+    Untracked:  data/adata/batch2_c2_hs_n10_d20.csv
+    Untracked:  data/adata/batch2_c2_hs_n10_d30.csv
+    Untracked:  data/adata/batch2_c2_hs_n1_d10.csv
+    Untracked:  data/adata/batch2_c2_hs_n1_d20.csv
+    Untracked:  data/adata/batch2_c2_hs_n1_d30.csv
+    Untracked:  data/adata/batch2_c2_hs_n5_d10.csv
+    Untracked:  data/adata/batch2_c2_hs_n5_d30.csv
+    Untracked:  data/adata/batch3_c1_hashsolo.csv
+    Untracked:  data/adata/batch3_c1_hs_n10_d10.csv
+    Untracked:  data/adata/batch3_c1_hs_n10_d20.csv
+    Untracked:  data/adata/batch3_c1_hs_n10_d30.csv
+    Untracked:  data/adata/batch3_c1_hs_n1_d10.csv
+    Untracked:  data/adata/batch3_c1_hs_n1_d20.csv
+    Untracked:  data/adata/batch3_c1_hs_n1_d30.csv
+    Untracked:  data/adata/batch3_c1_hs_n5_d10.csv
+    Untracked:  data/adata/batch3_c1_hs_n5_d30.csv
+    Untracked:  data/adata/batch3_c2_hashsolo.csv
+    Untracked:  data/adata/batch3_c2_hs_n10_d10.csv
+    Untracked:  data/adata/batch3_c2_hs_n10_d20.csv
+    Untracked:  data/adata/batch3_c2_hs_n10_d30.csv
+    Untracked:  data/adata/batch3_c2_hs_n1_d10.csv
+    Untracked:  data/adata/batch3_c2_hs_n1_d20.csv
+    Untracked:  data/adata/batch3_c2_hs_n1_d30.csv
+    Untracked:  data/adata/batch3_c2_hs_n5_d10.csv
+    Untracked:  data/adata/batch3_c2_hs_n5_d30.csv
+    Untracked:  data/adata/solid_tissue_batch1_hashsolo.csv
+    Untracked:  data/adata/solid_tissue_batch2_hashsolo.csv
+    Untracked:  data/solid_tumor_data/
+    Untracked:  figures/QC_plots_new.png
+    Untracked:  figures/Users/
+    Untracked:  filter_wrong_empties.Rmd
+    Untracked:  iscb_long_abstract.docx
+    Untracked:  iscb_long_abstract.pdf
+    Untracked:  oup-authoring-template/
+    Untracked:  output/mean_fscore_mcc.xlsx
+    Untracked:  paper_latex/
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+    Modified:   data/.DS_Store
+    Deleted:    data/GMM-Demux/SSD_mtx/barcodes.tsv.gz
+    Deleted:    data/GMM-Demux/SSD_mtx/features.tsv.gz
+    Deleted:    data/GMM-Demux/SSD_mtx/matrix.mtx.gz
+    Deleted:    data/GMM-Demux/batch1_c1_hto_counts_transpose.csv
+    Deleted:    data/GMM-Demux/batch1_c2_hto_counts_transpose.csv
+    Deleted:    data/GMM-Demux/batch2_c1_hto_counts_transpose.csv
+    Deleted:    data/GMM-Demux/batch2_c2_hto_counts_transpose.csv
+    Deleted:    data/GMM-Demux/batch3_c1_hto_counts_transpose.csv
+    Deleted:    data/GMM-Demux/batch3_c2_hto_counts_transpose.csv
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c1/full_report/GMM_full.config
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c1/full_report/GMM_full.csv
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c1/simplified_report/GMM_simplified.config
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c1/simplified_report/GMM_simplified.csv
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c2/full_report/GMM_full.config
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c2/full_report/GMM_full.csv
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c2/simplified_report/GMM_simplified.config
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c2/simplified_report/GMM_simplified.csv
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c3/full_report/GMM_full.config
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c3/full_report/GMM_full.csv
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c3/simplified_report/GMM_simplified.config
+    Deleted:    data/GMM-Demux/gmm_out_LMO_c3/simplified_report/GMM_simplified.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch1_c1/full_report/GMM_full.config
+    Deleted:    data/GMM-Demux/gmm_out_batch1_c1/full_report/GMM_full.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch1_c1/simplified_report/GMM_simplified.config
+    Deleted:    data/GMM-Demux/gmm_out_batch1_c1/simplified_report/GMM_simplified.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch1_c2/full_report/GMM_full.config
+    Deleted:    data/GMM-Demux/gmm_out_batch1_c2/full_report/GMM_full.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch1_c2/simplified_report/GMM_simplified.config
+    Deleted:    data/GMM-Demux/gmm_out_batch1_c2/simplified_report/GMM_simplified.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch2_c1/full_report/GMM_full.config
+    Deleted:    data/GMM-Demux/gmm_out_batch2_c1/full_report/GMM_full.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch2_c1/simplified_report/GMM_simplified.config
+    Deleted:    data/GMM-Demux/gmm_out_batch2_c1/simplified_report/GMM_simplified.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch2_c2/full_report/GMM_full.config
+    Deleted:    data/GMM-Demux/gmm_out_batch2_c2/full_report/GMM_full.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch2_c2/simplified_report/GMM_simplified.config
+    Deleted:    data/GMM-Demux/gmm_out_batch2_c2/simplified_report/GMM_simplified.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch3_c1/full_report/GMM_full.config
+    Deleted:    data/GMM-Demux/gmm_out_batch3_c1/full_report/GMM_full.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch3_c1/simplified_report/GMM_simplified.config
+    Deleted:    data/GMM-Demux/gmm_out_batch3_c1/simplified_report/GMM_simplified.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch3_c2/full_report/GMM_full.config
+    Deleted:    data/GMM-Demux/gmm_out_batch3_c2/full_report/GMM_full.csv
+    Deleted:    data/GMM-Demux/gmm_out_batch3_c2/simplified_report/GMM_simplified.config
+    Deleted:    data/GMM-Demux/gmm_out_batch3_c2/simplified_report/GMM_simplified.csv
+    Deleted:    data/GMM-Demux/lmo_counts_capture1_transpose.csv
+    Deleted:    data/GMM-Demux/lmo_counts_capture2_transpose.csv
+    Deleted:    data/GMM-Demux/lmo_counts_capture3_transpose.csv
+    Deleted:    data/GMM-Demux/run_GMM_demux_BAL.sh
+    Deleted:    data/GMM-Demux/run_GMM_demux_LMO.sh
+    Modified:   data/adata/batch1_HTOs.csv
+    Modified:   data/adata/batch1_c1_barcodes.csv
+    Modified:   data/adata/batch1_c1_counts.mtx
+    Modified:   data/adata/batch1_c2_barcodes.csv
+    Modified:   data/adata/batch1_c2_counts.mtx
+    Modified:   data/adata/batch2_HTOs.csv
+    Modified:   data/adata/batch2_c1_barcodes.csv
+    Modified:   data/adata/batch2_c1_counts.mtx
+    Modified:   data/adata/batch2_c2_barcodes.csv
+    Modified:   data/adata/batch2_c2_counts.mtx
+    Modified:   data/adata/batch3_HTOs.csv
+    Modified:   data/adata/batch3_c1_barcodes.csv
+    Modified:   data/adata/batch3_c1_counts.mtx
+    Modified:   data/adata/batch3_c2_barcodes.csv
+    Modified:   data/adata/batch3_c2_counts.mtx
+    Deleted:    data/batch1_c1_donors.csv
+    Deleted:    data/batch1_c1_hto_counts.csv
+    Deleted:    data/batch1_c2_donors.csv
+    Deleted:    data/batch1_c2_hto_counts.csv
+    Deleted:    data/batch1_hto_counts.csv
+    Deleted:    data/batch2_c1_donors.csv
+    Deleted:    data/batch2_c1_hto_counts.csv
+    Deleted:    data/batch2_c2_donors.csv
+    Deleted:    data/batch2_c2_hto_counts.csv
+    Deleted:    data/batch2_hto_counts.csv
+    Deleted:    data/batch3_c1_donors.csv
+    Deleted:    data/batch3_c1_hto_counts.csv
+    Deleted:    data/batch3_c2_donors.csv
+    Deleted:    data/batch3_c2_hto_counts.csv
+    Deleted:    data/batch3_hto_counts.csv
+    Deleted:    data/lmo_counts.csv
+    Deleted:    data/lmo_counts_capture1.csv
+    Deleted:    data/lmo_counts_capture2.csv
+    Deleted:    data/lmo_counts_capture3.csv
+    Deleted:    data/lmo_donors.csv
+    Deleted:    data/lmo_donors_capture1.csv
+    Deleted:    data/lmo_donors_capture2.csv
+    Deleted:    data/lmo_donors_capture3.csv
+    Modified:   figures/QC_plots.png
+    Modified:   figures/category_fractions.png
+    Modified:   hashsolo_calls.ipynb
+    Modified:   notebook_for_paper.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/BAL_analysis.Rmd</code>) and HTML
+(<code>docs/BAL_analysis.html</code>) files. If you’ve configured a
+remote Git repository (see <code>?wflow_git_remote</code>), click on the
+hyperlinks in the table below to view the files as they were in that
+past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/Oshlack/hashtag-demux-paper/blob/b8cab8bc57b24acd63ae0c9fc5584deaf4a89125/analysis/BAL_analysis.Rmd" target="_blank">b8cab8b</a>
+</td>
+<td>
+George Howitt
+</td>
+<td>
+2023-07-05
+</td>
+<td>
+wflow_publish("analysis/BAL_analysis.Rmd")
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>#Load libraries
+suppressPackageStartupMessages({
+library(here)
+library(BiocStyle)
+library(dplyr)
+library(janitor)
+library(ggplot2)
+library(cowplot)
+library(patchwork)
+library(DropletUtils)
+library(tidyverse)
+library(scuttle)
+library(scater)
+library(Seurat)
+library(pheatmap)
+library(speckle)
+library(dittoSeq)
+library(cellhashR)
+library(RColorBrewer)
+library(demuxmix)
+library(ComplexHeatmap)
+library(tidyHeatmap)
+library(viridis)
+})</code></pre>
+<div id="bal-data-set" class="section level1">
+<h1>BAL data set</h1>
+<p>This notebook contains the analysis code for all results and figures
+relating to the BAL data set in the paper “Benchmarking single-cell
+hashtag oligo demultiplexing methods”.</p>
+<p>The data set consists of three batches with eight genetically
+distinct samples in each. Each batch was processed in two separate
+captures. We run all the demultiplexing methods on a per-capture level
+before then recombining into batch level objects for later analysis.</p>
+<div id="data-loading-and-reduction" class="section level2">
+<h2>Data loading and reduction</h2>
+<p>Load in counts matrices and genetic IDs.</p>
+<pre class="r"><code>batch1_c1_counts &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch1_c1_hto_counts.csv&quot;), 
+                             check.names = FALSE, row.names = 1)
+batch1_c2_counts &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch1_c2_hto_counts.csv&quot;), 
+                             check.names = FALSE, row.names = 1)
+
+batch2_c1_counts &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch2_c1_hto_counts.csv&quot;), 
+                             check.names = FALSE, row.names = 1)
+batch2_c2_counts &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch2_c2_hto_counts.csv&quot;), 
+                             check.names = FALSE, row.names = 1)
+
+batch3_c1_counts &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch3_c1_hto_counts.csv&quot;), 
+                             check.names = FALSE, row.names = 1)
+batch3_c2_counts &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch3_c2_hto_counts.csv&quot;), 
+                             check.names = FALSE, row.names = 1)</code></pre>
+<pre class="r"><code>batch1_c1_donors &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch1_c1_donors.csv&quot;), row.names = 1)
+batch1_c2_donors &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch1_c2_donors.csv&quot;), row.names = 1)
+
+batch2_c1_donors &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch2_c1_donors.csv&quot;), row.names = 1)
+batch2_c2_donors &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch2_c2_donors.csv&quot;), row.names = 1)
+
+batch3_c1_donors &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch3_c1_donors.csv&quot;), row.names = 1)
+batch3_c2_donors &lt;- read.csv(here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch3_c2_donors.csv&quot;), row.names = 1)</code></pre>
+<p>Make Seurat objects</p>
+<pre class="r"><code>seu1_c1 &lt;- CreateSeuratObject(counts = batch1_c1_counts, assay = &quot;HTO&quot;)
+seu1_c2 &lt;- CreateSeuratObject(counts = batch1_c2_counts, assay = &quot;HTO&quot;)
+
+seu2_c1 &lt;- CreateSeuratObject(counts = batch2_c1_counts, assay = &quot;HTO&quot;)
+seu2_c2 &lt;- CreateSeuratObject(counts = batch2_c2_counts, assay = &quot;HTO&quot;)
+
+seu3_c1 &lt;- CreateSeuratObject(counts = batch3_c1_counts, assay = &quot;HTO&quot;)
+seu3_c2 &lt;- CreateSeuratObject(counts = batch3_c2_counts, assay = &quot;HTO&quot;)</code></pre>
+<pre class="r"><code>seu1_c1$Barcode &lt;- colnames(seu1_c1)
+seu1_c1$capture &lt;- &quot;capture_1&quot;
+seu1_c2$Barcode &lt;- colnames(seu1_c2)
+seu1_c2$capture &lt;- &quot;capture_2&quot;
+
+seu2_c1$Barcode &lt;- colnames(seu2_c1)
+seu2_c1$capture &lt;- &quot;capture_1&quot;
+seu2_c2$Barcode &lt;- colnames(seu2_c2)
+seu2_c2$capture &lt;- &quot;capture_2&quot;
+
+seu3_c1$Barcode &lt;- colnames(seu3_c1)
+seu3_c1$capture &lt;- &quot;capture_1&quot;
+seu3_c2$Barcode &lt;- colnames(seu3_c2)
+seu3_c2$capture &lt;- &quot;capture_2&quot;</code></pre>
+<p>Add genetic donor information to Seurat objects</p>
+<pre class="r"><code>seu1_c1$genetic_donor &lt;- batch1_c1_donors$genetic_donor
+seu1_c2$genetic_donor &lt;- batch1_c2_donors$genetic_donor
+
+seu2_c1$genetic_donor &lt;- batch2_c1_donors$genetic_donor
+seu2_c2$genetic_donor &lt;- batch2_c2_donors$genetic_donor
+
+seu3_c1$genetic_donor &lt;- batch3_c1_donors$genetic_donor
+seu3_c2$genetic_donor &lt;- batch3_c2_donors$genetic_donor</code></pre>
+<p>Merge into batch-level objects</p>
+<pre class="r"><code>seu1 &lt;- merge(seu1_c1, seu1_c2)
+seu2 &lt;- merge(seu2_c1, seu2_c2)
+seu3 &lt;- merge(seu3_c1, seu3_c2)</code></pre>
+<p>For each of the batches need lists associating the HTOs with the
+genetic donors.</p>
+<pre class="r"><code>HTO_list_batch1 &lt;- c(&quot;BAL 01&quot;, &quot;BAL 02&quot;, &quot;BAL 03&quot;, &quot;BAL 04&quot;, &quot;BAL 05&quot;, 
+                     &quot;BAL 06&quot;, &quot;BAL 07&quot;, &quot;BAL 08&quot;, &quot;Doublet&quot;, &quot;Negative&quot;)
+
+donor_list_batch1 &lt;- list(&quot;BAL A&quot; = &quot;BAL 01&quot;,
+                          &quot;BAL B&quot; = &quot;BAL 02&quot;,
+                          &quot;BAL C&quot; = &quot;BAL 03&quot;,
+                          &quot;BAL D&quot; = &quot;BAL 04&quot;,
+                          &quot;BAL E&quot; = &quot;BAL 05&quot;,
+                          &quot;BAL F&quot; = &quot;BAL 06&quot;,
+                          &quot;BAL G&quot; = &quot;BAL 07&quot;,
+                          &quot;BAL H&quot; = &quot;BAL 08&quot;,
+                          &quot;Doublet&quot; = &quot;Doublet&quot;, 
+                          &quot;Negative&quot; = &quot;Negative&quot;)
+
+HTO_donor_list_batch1 &lt;- list(&quot;BAL 01&quot; = &quot;BAL A&quot;, 
+                              &quot;BAL 02&quot; = &quot;BAL B&quot;, 
+                              &quot;BAL 03&quot; = &quot;BAL C&quot;, 
+                              &quot;BAL 04&quot; = &quot;BAL D&quot;, 
+                              &quot;BAL 05&quot; = &quot;BAL E&quot;, 
+                              &quot;BAL 06&quot; = &quot;BAL F&quot;, 
+                              &quot;BAL 07&quot; = &quot;BAL G&quot;, 
+                              &quot;BAL 08&quot; = &quot;BAL H&quot;, 
+                              &quot;Doublet&quot; = &quot;Doublet&quot;, 
+                              &quot;Negative&quot; = &quot;Negative&quot;)
+
+HTO_list_batch2 &lt;- c(&quot;BAL 09&quot;, &quot;BAL 10&quot;, &quot;BAL 11&quot;, &quot;BAL 12&quot;, &quot;BAL 13&quot;, 
+                     &quot;BAL 14&quot;, &quot;BAL 15&quot;, &quot;BAL 16&quot;, &quot;Doublet&quot;, &quot;Negative&quot;)
+
+donor_list_batch2 &lt;- list(&quot;BAL I&quot; = &quot;BAL 09&quot;,
+                          &quot;BAL J&quot; = &quot;BAL 10&quot;,
+                          &quot;BAL K&quot; = &quot;BAL 11&quot;,
+                          &quot;BAL L&quot; = &quot;BAL 12&quot;,
+                          &quot;BAL M&quot; = &quot;BAL 13&quot;,
+                          &quot;BAL N&quot; = &quot;BAL 14&quot;,
+                          &quot;BAL O&quot; = &quot;BAL 15&quot;,
+                          &quot;BAL P&quot; = &quot;BAL 16&quot;,
+                          &quot;Doublet&quot; = &quot;Doublet&quot;, 
+                          &quot;Negative&quot; = &quot;Negative&quot;)
+
+HTO_donor_list_batch2 &lt;- list(&quot;BAL 09&quot; = &quot;BAL I&quot;, 
+                              &quot;BAL 10&quot; = &quot;BAL J&quot;, 
+                              &quot;BAL 11&quot; = &quot;BAL K&quot;, 
+                              &quot;BAL 12&quot; = &quot;BAL L&quot;, 
+                              &quot;BAL 13&quot; = &quot;BAL M&quot;, 
+                              &quot;BAL 14&quot; = &quot;BAL N&quot;, 
+                              &quot;BAL 15&quot; = &quot;BAL O&quot;, 
+                              &quot;BAL 16&quot; = &quot;BAL P&quot;, 
+                              &quot;Doublet&quot; = &quot;Doublet&quot;, 
+                              &quot;Negative&quot; = &quot;Negative&quot;)
+
+HTO_list_batch3 &lt;- c(&quot;BAL 17&quot;, &quot;BAL 18&quot;, &quot;BAL 19&quot;, &quot;BAL 20&quot;, &quot;BAL 21&quot;, 
+                     &quot;BAL 22&quot;, &quot;BAL 23&quot;, &quot;BAL 24&quot;, &quot;Doublet&quot;, &quot;Negative&quot;)
+
+donor_list_batch3 &lt;- list(&quot;BAL Q&quot; = &quot;BAL 17&quot;,
+                          &quot;BAL R&quot; = &quot;BAL 18&quot;,
+                          &quot;BAL S&quot; = &quot;BAL 19&quot;,
+                          &quot;BAL T&quot; = &quot;BAL 20&quot;,
+                          &quot;BAL U&quot; = &quot;BAL 21&quot;,
+                          &quot;BAL V&quot; = &quot;BAL 22&quot;,
+                          &quot;BAL W&quot; = &quot;BAL 23&quot;,
+                          &quot;BAL X&quot; = &quot;BAL 24&quot;,
+                          &quot;Doublet&quot; = &quot;Doublet&quot;, 
+                          &quot;Negative&quot; = &quot;Negative&quot;)
+
+HTO_donor_list_batch3 &lt;- list(&quot;BAL 17&quot; = &quot;BAL Q&quot;, 
+                              &quot;BAL 18&quot; = &quot;BAL R&quot;, 
+                              &quot;BAL 19&quot; = &quot;BAL S&quot;, 
+                              &quot;BAL 20&quot; = &quot;BAL T&quot;, 
+                              &quot;BAL 21&quot; = &quot;BAL U&quot;, 
+                              &quot;BAL 22&quot; = &quot;BAL V&quot;, 
+                              &quot;BAL 23&quot; = &quot;BAL W&quot;, 
+                              &quot;BAL 24&quot; = &quot;BAL X&quot;, 
+                              &quot;Doublet&quot; = &quot;Doublet&quot;, 
+                              &quot;Negative&quot; = &quot;Negative&quot;)</code></pre>
+<p>Compute PCAs and tSNEs</p>
+<pre class="r"><code>DefaultAssay(seu1) &lt;- &quot;HTO&quot;
+seu1 &lt;- NormalizeData(seu1, assay = &quot;HTO&quot;, normalization.method = &quot;CLR&quot;)</code></pre>
+<pre><code>Normalizing across features</code></pre>
+<pre class="r"><code>seu1 &lt;- ScaleData(seu1, features = rownames(seu1),
+    verbose = FALSE)
+seu1 &lt;- RunPCA(seu1, features = rownames(seu1), approx = FALSE, verbose = FALSE)
+seu1 &lt;- RunTSNE(seu1, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+DefaultAssay(seu2) &lt;- &quot;HTO&quot;
+seu2 &lt;- NormalizeData(seu2, assay = &quot;HTO&quot;, normalization.method = &quot;CLR&quot;)</code></pre>
+<pre><code>Normalizing across features</code></pre>
+<pre class="r"><code>seu2 &lt;- ScaleData(seu2, features = rownames(seu2),
+    verbose = FALSE)
+seu2 &lt;- RunPCA(seu2, features = rownames(seu2), approx = FALSE, verbose = FALSE)
+seu2 &lt;- RunTSNE(seu2, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+DefaultAssay(seu3) &lt;- &quot;HTO&quot;
+seu3 &lt;- NormalizeData(seu3, assay = &quot;HTO&quot;, normalization.method = &quot;CLR&quot;)</code></pre>
+<pre><code>Normalizing across features</code></pre>
+<pre class="r"><code>seu3 &lt;- ScaleData(seu3, features = rownames(seu3),
+    verbose = FALSE)
+seu3 &lt;- RunPCA(seu3, features = rownames(seu3), approx = FALSE, verbose = FALSE)
+seu3 &lt;- RunTSNE(seu3, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)</code></pre>
+<p>Same for individual captures</p>
+<pre class="r"><code>DefaultAssay(seu1_c1) &lt;- &quot;HTO&quot;
+seu1_c1 &lt;- NormalizeData(seu1_c1, assay = &quot;HTO&quot;, normalization.method = &quot;CLR&quot;)</code></pre>
+<pre><code>Normalizing across features</code></pre>
+<pre class="r"><code>seu1_c1 &lt;- ScaleData(seu1_c1, features = rownames(seu1_c1),
+    verbose = FALSE)
+seu1_c1 &lt;- RunPCA(seu1_c1, features = rownames(seu1_c1), approx = FALSE, verbose = FALSE)
+seu1_c1 &lt;- RunTSNE(seu1_c1, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+DefaultAssay(seu1_c2) &lt;- &quot;HTO&quot;
+seu1_c2 &lt;- NormalizeData(seu1_c2, assay = &quot;HTO&quot;, normalization.method = &quot;CLR&quot;)</code></pre>
+<pre><code>Normalizing across features</code></pre>
+<pre class="r"><code>seu1_c2 &lt;- ScaleData(seu1_c2, features = rownames(seu1_c2),
+    verbose = FALSE)
+seu1_c2 &lt;- RunPCA(seu1_c2, features = rownames(seu1_c2), approx = FALSE, verbose = FALSE)
+seu1_c2 &lt;- RunTSNE(seu1_c2, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+seu2_c1 &lt;- NormalizeData(seu2_c1, assay = &quot;HTO&quot;, normalization.method = &quot;CLR&quot;)</code></pre>
+<pre><code>Normalizing across features</code></pre>
+<pre class="r"><code>seu2_c1 &lt;- ScaleData(seu2_c1, features = rownames(seu2_c1),
+    verbose = FALSE)
+seu2_c1 &lt;- RunPCA(seu2_c1, features = rownames(seu2_c1), approx = FALSE, verbose = FALSE)
+seu2_c1 &lt;- RunTSNE(seu2_c1, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+DefaultAssay(seu2_c2) &lt;- &quot;HTO&quot;
+seu2_c2 &lt;- NormalizeData(seu2_c2, assay = &quot;HTO&quot;, normalization.method = &quot;CLR&quot;)</code></pre>
+<pre><code>Normalizing across features</code></pre>
+<pre class="r"><code>seu2_c2 &lt;- ScaleData(seu2_c2, features = rownames(seu2_c2),
+    verbose = FALSE)
+seu2_c2 &lt;- RunPCA(seu2_c2, features = rownames(seu2_c2), approx = FALSE, verbose = FALSE)
+seu2_c2 &lt;- RunTSNE(seu2_c2, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+seu3_c1 &lt;- NormalizeData(seu3_c1, assay = &quot;HTO&quot;, normalization.method = &quot;CLR&quot;)</code></pre>
+<pre><code>Normalizing across features</code></pre>
+<pre class="r"><code>seu3_c1 &lt;- ScaleData(seu3_c1, features = rownames(seu3_c1),
+    verbose = FALSE)
+seu3_c1 &lt;- RunPCA(seu3_c1, features = rownames(seu3_c1), approx = FALSE, verbose = FALSE)
+seu3_c1 &lt;- RunTSNE(seu3_c1, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)
+
+DefaultAssay(seu3_c2) &lt;- &quot;HTO&quot;
+seu3_c2 &lt;- NormalizeData(seu3_c2, assay = &quot;HTO&quot;, normalization.method = &quot;CLR&quot;)</code></pre>
+<pre><code>Normalizing across features</code></pre>
+<pre class="r"><code>seu3_c2 &lt;- ScaleData(seu3_c2, features = rownames(seu3_c2),
+    verbose = FALSE)
+seu3_c2 &lt;- RunPCA(seu3_c2, features = rownames(seu3_c2), approx = FALSE, verbose = FALSE)
+seu3_c2 &lt;- RunTSNE(seu3_c2, dims = 1:8, perplexity = 100, check_duplicates = FALSE, verbose = FALSE)</code></pre>
+</div>
+<div id="qc-plots" class="section level2">
+<h2>QC plots</h2>
+<p>Density plots per barcode. In ideal conditions the density of the
+hashtag counts should appear bimodal, with a lower peak corresponding to
+the background and the higher peak corresponding to the signal.</p>
+<pre class="r"><code>df1 &lt;- as.data.frame(t(seu1[[&quot;HTO&quot;]]@counts))
+df1 %&gt;%
+  pivot_longer(cols = starts_with(&quot;BAL&quot;)) %&gt;%
+  mutate(logged = log(value + 1)) %&gt;%
+  ggplot(aes(x = logged)) +
+  xlab(&quot;log(counts)&quot;) +
+  xlim(0.1,8) +
+  ggtitle(&quot;Batch 1&quot;) +
+  geom_density(adjust = 5) +
+  facet_wrap(~name, scales = &quot;fixed&quot;, ncol = 4) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks = element_blank()) -&gt; p1
+
+df2 &lt;- as.data.frame(t(seu2[[&quot;HTO&quot;]]@counts))
+df2 %&gt;%
+  pivot_longer(cols = starts_with(&quot;BAL&quot;)) %&gt;%
+  mutate(logged = log(value + 1)) %&gt;%
+  ggplot(aes(x = logged)) +
+  xlab(&quot;log(counts)&quot;) +
+  xlim(0.1, 8) +
+  ggtitle(&quot;Batch 2&quot;) +
+  geom_density(adjust = 5) +
+  facet_wrap(~name, scales = &quot;fixed&quot;, ncol = 4) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) -&gt; p2
+
+df3 &lt;- as.data.frame(t(seu3[[&quot;HTO&quot;]]@counts))
+df3 %&gt;%
+  pivot_longer(cols = starts_with(&quot;BAL&quot;)) %&gt;%
+  mutate(logged = log(value + 1)) %&gt;%
+  ggplot(aes(x = logged)) +
+  xlab(&quot;log(counts)&quot;) +
+  xlim(0.1,8) +
+  ggtitle(&quot;Batch 3&quot;) +
+  geom_density(adjust = 5) +
+  facet_wrap(~name, scales = &quot;fixed&quot;, ncol = 4) +
+  theme(axis.ticks = element_blank()) -&gt; p3
+
+(p1 / p2 / p3) + plot_annotation(tag_levels = &#39;a&#39;)</code></pre>
+<pre><code>Warning: Removed 2242 rows containing non-finite values (`stat_density()`).</code></pre>
+<pre><code>Warning: Removed 1241 rows containing non-finite values (`stat_density()`).</code></pre>
+<pre><code>Warning: Removed 4490 rows containing non-finite values (`stat_density()`).</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" />
+tSNE plots</p>
+<pre class="r"><code>p4 &lt;- DimPlot(seu1, group.by = &quot;genetic_donor&quot;) +
+  ggtitle(&quot;Batch 1&quot;) + 
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank(),
+        legend.text=element_text(size = 5),
+        plot.margin = margin(0,0,0,0,&quot;cm&quot;))
+
+p5 &lt;- DimPlot(seu2, group.by = &quot;genetic_donor&quot;) +
+  ggtitle(&quot;Batch 2&quot;) +
+  xlab(&quot;&quot;) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(),
+        legend.text=element_text(size=5),
+        plot.margin = margin(0,0,0,0,&quot;cm&quot;))
+
+p6 &lt;- DimPlot(seu3, group.by = &quot;genetic_donor&quot;) +
+  ggtitle(&quot;Batch 3&quot;) + 
+  ylab(&quot;&quot;) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.y = element_blank(),
+        legend.text=element_text(size = 5),
+        plot.margin = margin(0,0,0,0,&quot;cm&quot;))
+
+p4 / p5 / p6</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>(((p1 / p2 / p3) | (p4 / p5 / p6)) + plot_annotation(tag_levels = &#39;a&#39;)) &amp; 
+  theme(plot.title = element_text(face = &quot;plain&quot;, size = 10), 
+        plot.tag = element_text(face = &#39;plain&#39;))</code></pre>
+<pre><code>Warning: Removed 2242 rows containing non-finite values (`stat_density()`).</code></pre>
+<pre><code>Warning: Removed 1241 rows containing non-finite values (`stat_density()`).</code></pre>
+<pre><code>Warning: Removed 4490 rows containing non-finite values (`stat_density()`).</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#ggsave(here(&quot;paper_latex&quot;, &quot;figures&quot;, &quot;QC_plots_new.png&quot;),
+#       plot = (((p1 / p2 / p3) | (p4 / p5 / p6)) + plot_annotation(tag_levels = &#39;a&#39;)) &amp;
+#         theme(plot.title = element_text(face = &quot;plain&quot;, size = 10), 
+#               plot.tag = element_text(face = &#39;plain&#39;)),
+#       device = &quot;png&quot;,
+       #path = here(&quot;paper_latex&quot;figures&quot;),
+#       width = 10, height = 9,
+#       units = &quot;in&quot;,
+#       dpi = 300)</code></pre>
+<p>Checking if there’s any noticeable difference between the combined
+results and the capture-separated results.</p>
+<pre class="r"><code>p4 &lt;- DimPlot(seu1_c1, group.by = &quot;genetic_donor&quot;) +
+  ggtitle(&quot;Batch 1 (capture 1)&quot;) + 
+  NoLegend() +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank(),
+        plot.margin = margin(0,0,0,0,&quot;cm&quot;))
+p5 &lt;- DimPlot(seu2_c1, group.by = &quot;genetic_donor&quot;) +
+  ggtitle(&quot;Batch 2 (capture 1)&quot;) +
+  xlab(&quot;&quot;) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(),
+        plot.margin = margin(0,0,0,0,&quot;cm&quot;))
+p6 &lt;- DimPlot(seu3_c1, group.by = &quot;genetic_donor&quot;) +
+  ggtitle(&quot;Batch 3 (capture 1)&quot;) + 
+  NoLegend() +
+  ylab(&quot;&quot;) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.y = element_blank(),
+        plot.margin = margin(0,0,0,0,&quot;cm&quot;))
+
+p7 &lt;- DimPlot(seu1_c2, group.by = &quot;genetic_donor&quot;) +
+  ggtitle(&quot;Batch 1 (capture 2)&quot;) + 
+  NoLegend() +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank(),
+        plot.margin = margin(0,0,0,0,&quot;cm&quot;))
+p8 &lt;- DimPlot(seu2_c2, group.by = &quot;genetic_donor&quot;) +
+  ggtitle(&quot;Batch 2 (capture 2)&quot;) +
+  xlab(&quot;&quot;) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.x = element_blank(),
+        plot.margin = margin(0,0,0,0,&quot;cm&quot;))
+p9 &lt;- DimPlot(seu3_c2, group.by = &quot;genetic_donor&quot;) +
+  ggtitle(&quot;Batch 3 (capture 2)&quot;) + 
+  NoLegend() +
+  ylab(&quot;&quot;) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_blank(), axis.line.y = element_blank(),
+        axis.title.y = element_blank(),
+        plot.margin = margin(0,0,0,0,&quot;cm&quot;))</code></pre>
+<pre class="r"><code>(p1 / p2 / p3) | (p4 / p5 / p6) | (p7 / p8 / p9)</code></pre>
+<pre><code>Warning: Removed 2242 rows containing non-finite values (`stat_density()`).</code></pre>
+<pre><code>Warning: Removed 1241 rows containing non-finite values (`stat_density()`).</code></pre>
+<pre><code>Warning: Removed 4490 rows containing non-finite values (`stat_density()`).</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="hashtag-based-demultiplexing." class="section level2">
+<h2>Hashtag-based demultiplexing.</h2>
+<p>This is where we run each of the demultiplexing methods on each
+capture of each batch.</p>
+<div id="hasheddrops" class="section level3">
+<h3>hashedDrops</h3>
+<p>This function creates a list of hashedDrops calls. Its defaults are
+the same as hashedDrops</p>
+<pre class="r"><code>create_hashedDrops_factor &lt;- function(seurat_object, confident.min = 2,
+                              doublet.nmads = 3, doublet.min = 2) {
+  hto_counts &lt;- GetAssayData(seurat_object[[&quot;HTO&quot;]], slot = &quot;counts&quot;)
+  hash_stats &lt;- DropletUtils::hashedDrops(hto_counts, confident.min = confident.min,
+                                          doublet.nmads = doublet.nmads, doublet.min = doublet.min)
+  
+  hash_stats$Best &lt;- rownames(seurat_object[[&quot;HTO&quot;]])[hash_stats$Best]
+  hash_stats$Second &lt;- rownames(seurat_object[[&quot;HTO&quot;]])[hash_stats$Second]
+  
+  HTO_assignments &lt;- factor(case_when(
+    hash_stats$Confident == TRUE ~ hash_stats$Best,
+    hash_stats$Doublet == TRUE ~ &quot;Doublet&quot;,
+    TRUE ~ &quot;Negative&quot;))
+  return(HTO_assignments)
+  }</code></pre>
+<p>Making factors with best parameters</p>
+<pre class="r"><code>seu1_c1$hashedDrops_calls &lt;- create_hashedDrops_factor(seu1_c1, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+seu1_c2$hashedDrops_calls &lt;- create_hashedDrops_factor(seu1_c2, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+
+seu2_c1$hashedDrops_calls &lt;- create_hashedDrops_factor(seu2_c1, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+seu2_c2$hashedDrops_calls &lt;- create_hashedDrops_factor(seu2_c2, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+
+seu3_c1$hashedDrops_calls &lt;- create_hashedDrops_factor(seu3_c1, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)
+seu3_c2$hashedDrops_calls &lt;- create_hashedDrops_factor(seu3_c2, confident.min = 0.5, doublet.nmads = 3, doublet.min = 2)</code></pre>
+<p>Now with default parameters</p>
+<pre class="r"><code>seu1_c1$hashedDrops_default_calls &lt;- create_hashedDrops_factor(seu1_c1)
+seu1_c2$hashedDrops_default_calls &lt;- create_hashedDrops_factor(seu1_c2)
+
+seu2_c1$hashedDrops_default_calls &lt;- create_hashedDrops_factor(seu2_c1)
+seu2_c2$hashedDrops_default_calls &lt;- create_hashedDrops_factor(seu2_c2)
+
+seu3_c1$hashedDrops_default_calls &lt;- create_hashedDrops_factor(seu3_c1)
+seu3_c2$hashedDrops_default_calls &lt;- create_hashedDrops_factor(seu3_c2)</code></pre>
+</div>
+<div id="hashsolo" class="section level3">
+<h3>Hashsolo</h3>
+<p>HashSolo is a scanpy program. Needs a bit of prep</p>
+<p>Write to anndata compatible files Counts</p>
+<pre class="r"><code>library(Matrix)</code></pre>
+<pre><code>
+Attaching package: &#39;Matrix&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:tidyr&#39;:
+
+    expand, pack, unpack</code></pre>
+<pre><code>The following object is masked from &#39;package:S4Vectors&#39;:
+
+    expand</code></pre>
+<pre class="r"><code>writeMM(seu1_c1@assays$HTO@counts, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch1_c1_counts.mtx&quot;))</code></pre>
+<pre><code>NULL</code></pre>
+<pre class="r"><code>writeMM(seu1_c2@assays$HTO@counts, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch1_c2_counts.mtx&quot;))</code></pre>
+<pre><code>NULL</code></pre>
+<pre class="r"><code>writeMM(seu2_c1@assays$HTO@counts, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch2_c1_counts.mtx&quot;))</code></pre>
+<pre><code>NULL</code></pre>
+<pre class="r"><code>writeMM(seu2_c2@assays$HTO@counts, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch2_c2_counts.mtx&quot;))</code></pre>
+<pre><code>NULL</code></pre>
+<pre class="r"><code>writeMM(seu3_c1@assays$HTO@counts, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch3_c1_counts.mtx&quot;))</code></pre>
+<pre><code>NULL</code></pre>
+<pre class="r"><code>writeMM(seu3_c2@assays$HTO@counts, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch3_c2_counts.mtx&quot;))</code></pre>
+<pre><code>NULL</code></pre>
+<p>Barcodes</p>
+<pre class="r"><code>barcodes &lt;- data.frame(colnames(seu1_c1))
+colnames(barcodes)&lt;-&#39;Barcode&#39;
+write.csv(barcodes, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch1_c1_barcodes.csv&quot;),
+          quote = FALSE,row.names = FALSE)
+barcodes &lt;- data.frame(colnames(seu1_c2))
+colnames(barcodes)&lt;-&#39;Barcode&#39;
+write.csv(barcodes, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch1_c2_barcodes.csv&quot;),
+          quote = FALSE,row.names = FALSE)
+
+barcodes &lt;- data.frame(colnames(seu2_c1))
+colnames(barcodes)&lt;-&#39;Barcode&#39;
+write.csv(barcodes, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch2_c1_barcodes.csv&quot;),
+          quote = FALSE,row.names = FALSE)
+barcodes &lt;- data.frame(colnames(seu2_c2))
+colnames(barcodes)&lt;-&#39;Barcode&#39;
+write.csv(barcodes, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch2_c2_barcodes.csv&quot;),
+          quote = FALSE,row.names = FALSE)
+
+barcodes &lt;- data.frame(colnames(seu3_c1))
+colnames(barcodes)&lt;-&#39;Barcode&#39;
+write.csv(barcodes, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch3_c1_barcodes.csv&quot;),
+          quote = FALSE,row.names = FALSE)
+barcodes &lt;- data.frame(colnames(seu3_c2))
+colnames(barcodes)&lt;-&#39;Barcode&#39;
+write.csv(barcodes, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch3_c2_barcodes.csv&quot;),
+          quote = FALSE,row.names = FALSE)</code></pre>
+<p>Save HTO names (just need one capture per batch)</p>
+<pre class="r"><code>HTOs &lt;- data.frame(rownames(seu1_c1))
+colnames(HTOs) &lt;- &#39;HTO&#39;
+write.csv(HTOs, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch1_HTOs.csv&quot;),
+          quote = FALSE,row.names = FALSE)
+
+HTOs &lt;- data.frame(rownames(seu2_c1))
+colnames(HTOs) &lt;- &#39;HTO&#39;
+write.csv(HTOs, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch2_HTOs.csv&quot;),
+          quote = FALSE,row.names = FALSE)
+
+HTOs &lt;- data.frame(rownames(seu3_c1))
+colnames(HTOs) &lt;- &#39;HTO&#39;
+write.csv(HTOs, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;adata&quot;, &quot;batch3_HTOs.csv&quot;),
+          quote = FALSE,row.names = FALSE)</code></pre>
+<p>See hashsolo_calls.ipynb for how we get these assignments</p>
+<pre class="r"><code>seu1_c1$hashsolo_calls &lt;- read.csv(&quot;~/singlecell/hashtag-demux-paper/data/BAL_data/batch1_c1_hashsolo.csv&quot;)$Classification
+seu1_c2$hashsolo_calls &lt;- read.csv(&quot;~/singlecell/hashtag-demux-paper/data/BAL_data/batch1_c2_hashsolo.csv&quot;)$Classification
+
+seu2_c1$hashsolo_calls &lt;- read.csv(&quot;~/singlecell/hashtag-demux-paper/data/BAL_data/batch2_c1_hashsolo.csv&quot;)$Classification
+seu2_c2$hashsolo_calls &lt;- read.csv(&quot;~/singlecell/hashtag-demux-paper/data/BAL_data/batch2_c2_hashsolo.csv&quot;)$Classification
+
+seu3_c1$hashsolo_calls &lt;- read.csv(&quot;~/singlecell/hashtag-demux-paper/data/BAL_data/batch3_c1_hashsolo.csv&quot;)$Classification
+seu3_c2$hashsolo_calls &lt;- read.csv(&quot;~/singlecell/hashtag-demux-paper/data/BAL_data/batch3_c2_hashsolo.csv&quot;)$Classification</code></pre>
+</div>
+<div id="htodemux" class="section level3">
+<h3>HTODemux</h3>
+<pre class="r"><code>HDmux &lt;- HTODemux(seu1_c1)</code></pre>
+<pre><code>Cutoff for BAL 01 : 74 reads</code></pre>
+<pre><code>Cutoff for BAL 02 : 103 reads</code></pre>
+<pre><code>Cutoff for BAL 03 : 80 reads</code></pre>
+<pre><code>Cutoff for BAL 04 : 30 reads</code></pre>
+<pre><code>Cutoff for BAL 05 : 52 reads</code></pre>
+<pre><code>Cutoff for BAL 06 : 23 reads</code></pre>
+<pre><code>Cutoff for BAL 07 : 36 reads</code></pre>
+<pre><code>Cutoff for BAL 08 : 57 reads</code></pre>
+<pre class="r"><code>seu1_c1$HTODemux_calls &lt;- HDmux$hash.ID
+HDmux &lt;- HTODemux(seu1_c2)</code></pre>
+<pre><code>Cutoff for BAL 01 : 93 reads</code></pre>
+<pre><code>Cutoff for BAL 02 : 164 reads</code></pre>
+<pre><code>Cutoff for BAL 03 : 75 reads</code></pre>
+<pre><code>Cutoff for BAL 04 : 32 reads</code></pre>
+<pre><code>Cutoff for BAL 05 : 71 reads</code></pre>
+<pre><code>Cutoff for BAL 06 : 38 reads</code></pre>
+<pre><code>Cutoff for BAL 07 : 40 reads</code></pre>
+<pre><code>Cutoff for BAL 08 : 48 reads</code></pre>
+<pre class="r"><code>seu1_c2$HTODemux_calls &lt;- HDmux$hash.ID
+
+HDmux &lt;- HTODemux(seu2_c1)</code></pre>
+<pre><code>Cutoff for BAL 09 : 50 reads</code></pre>
+<pre><code>Cutoff for BAL 10 : 29 reads</code></pre>
+<pre><code>Cutoff for BAL 11 : 25 reads</code></pre>
+<pre><code>Cutoff for BAL 12 : 94 reads</code></pre>
+<pre><code>Cutoff for BAL 13 : 25 reads</code></pre>
+<pre><code>Cutoff for BAL 14 : 16 reads</code></pre>
+<pre><code>Cutoff for BAL 15 : 131 reads</code></pre>
+<pre><code>Cutoff for BAL 16 : 77 reads</code></pre>
+<pre class="r"><code>seu2_c1$HTODemux_calls &lt;- HDmux$hash.ID
+HDmux &lt;- HTODemux(seu2_c2)</code></pre>
+<pre><code>Cutoff for BAL 09 : 64 reads</code></pre>
+<pre><code>Cutoff for BAL 10 : 20 reads</code></pre>
+<pre><code>Cutoff for BAL 11 : 23 reads</code></pre>
+<pre><code>Cutoff for BAL 12 : 107 reads</code></pre>
+<pre><code>Cutoff for BAL 13 : 27 reads</code></pre>
+<pre><code>Cutoff for BAL 14 : 22 reads</code></pre>
+<pre><code>Cutoff for BAL 15 : 127 reads</code></pre>
+<pre><code>Cutoff for BAL 16 : 100 reads</code></pre>
+<pre class="r"><code>seu2_c2$HTODemux_calls &lt;- HDmux$hash.ID
+
+HDmux &lt;- HTODemux(seu3_c1)</code></pre>
+<pre><code>Cutoff for BAL 17 : 14 reads</code></pre>
+<pre><code>Cutoff for BAL 18 : 22 reads</code></pre>
+<pre><code>Cutoff for BAL 19 : 11 reads</code></pre>
+<pre><code>Cutoff for BAL 20 : 51 reads</code></pre>
+<pre><code>Cutoff for BAL 21 : 13 reads</code></pre>
+<pre><code>Cutoff for BAL 22 : 25 reads</code></pre>
+<pre><code>Cutoff for BAL 23 : 46 reads</code></pre>
+<pre><code>Cutoff for BAL 24 : 73 reads</code></pre>
+<pre class="r"><code>seu3_c1$HTODemux_calls &lt;- HDmux$hash.ID
+HDmux &lt;- HTODemux(seu3_c2)</code></pre>
+<pre><code>Cutoff for BAL 17 : 18 reads</code></pre>
+<pre><code>Cutoff for BAL 18 : 33 reads</code></pre>
+<pre><code>Cutoff for BAL 19 : 21 reads</code></pre>
+<pre><code>Cutoff for BAL 20 : 68 reads</code></pre>
+<pre><code>Cutoff for BAL 21 : 19 reads</code></pre>
+<pre><code>Cutoff for BAL 22 : 18 reads</code></pre>
+<pre><code>Cutoff for BAL 23 : 85 reads</code></pre>
+<pre><code>Cutoff for BAL 24 : 80 reads</code></pre>
+<pre class="r"><code>seu3_c2$HTODemux_calls &lt;- HDmux$hash.ID</code></pre>
+</div>
+<div id="gmm-demux" class="section level3">
+<h3>GMM-Demux</h3>
+<p>Need to write transpose of counts matrices to .csv files to run
+GMM-Demux on command line.</p>
+<pre class="r"><code>write.csv(t(as.matrix(batch1_c1_counts)), here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;batch1_c1_hto_counts_transpose.csv&quot;))
+write.csv(t(as.matrix(batch1_c2_counts)), here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;batch1_c2_hto_counts_transpose.csv&quot;))
+
+write.csv(t(as.matrix(batch2_c1_counts)), here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;batch2_c1_hto_counts_transpose.csv&quot;))
+write.csv(t(as.matrix(batch2_c2_counts)), here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;batch2_c2_hto_counts_transpose.csv&quot;))
+
+write.csv(t(as.matrix(batch3_c1_counts)), here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;batch3_c1_hto_counts_transpose.csv&quot;))
+write.csv(t(as.matrix(batch3_c2_counts)), here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;batch3_c2_hto_counts_transpose.csv&quot;))</code></pre>
+<p>See run_GMM_demux_BAL.sh script for running GMM-Demux</p>
+<p>This function takes the output of GMM demux and makes it consistent
+with the rest of the methods considered here.</p>
+<pre class="r"><code>create_gmm_demux_factor &lt;- function(seu, GMM_path, hto_list) {
+  #Read in output, have to use the &quot;full&quot; report, not the simplified one.
+  calls &lt;- read.csv(paste0(GMM_path, &quot;/GMM_full.csv&quot;), row.names = 1)
+  #Read in names of clusters
+  cluster_names &lt;- read.table(paste0(GMM_path, &quot;/GMM_full.config&quot;), sep = &quot;,&quot;)
+  names(cluster_names) &lt;- c(&quot;Cluster_id&quot;, &quot;assignment&quot;)
+  #Need to fix the formatting of the assignment names, for some reason there&#39;s a leading space.
+  cluster_names$assignment &lt;- gsub(x = cluster_names$assignment, pattern = &#39;^ &#39;, replacement = &#39;&#39;)
+  #Add cell barcodes 
+  calls$Barcode &lt;- rownames(calls)
+  calls &lt;- merge(calls, cluster_names, by = &quot;Cluster_id&quot;, sort = FALSE)
+  #Need to re-order after merge for some reason
+  calls &lt;- calls[order(match(calls$Barcode, names(seu$Barcode))), ]
+  #Rename the negative cluster for consistency
+  calls$assignment[calls$assignment == &quot;negative&quot;] &lt;- &quot;Negative&quot;
+  #Put all the multiplet states into one assignment category
+  calls$assignment[!calls$assignment %in% c(&quot;Negative&quot;, hto_list)] &lt;- &quot;Doublet&quot;
+  return(as.factor(calls$assignment))
+}</code></pre>
+<p>Add to objects</p>
+<pre class="r"><code>#Batch 1
+seu1_c1$GMMDemux_calls &lt;- create_gmm_demux_factor(seu1_c1, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;gmm_out_batch1_c1&quot;, &quot;full_report&quot;), HTO_list_batch1) 
+seu1_c2$GMMDemux_calls &lt;- create_gmm_demux_factor(seu1_c2, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;gmm_out_batch1_c2&quot;, &quot;full_report&quot;), HTO_list_batch1) 
+
+#Batch 2
+seu2_c1$GMMDemux_calls &lt;- create_gmm_demux_factor(seu2_c1, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;gmm_out_batch2_c1&quot;, &quot;full_report&quot;), HTO_list_batch2) 
+seu2_c2$GMMDemux_calls &lt;- create_gmm_demux_factor(seu2_c2, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;gmm_out_batch2_c2&quot;, &quot;full_report&quot;), HTO_list_batch2) 
+
+#Batch 3
+seu3_c1$GMMDemux_calls &lt;- create_gmm_demux_factor(seu3_c1, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;gmm_out_batch3_c1&quot;, &quot;full_report&quot;), HTO_list_batch3) 
+seu3_c2$GMMDemux_calls &lt;- create_gmm_demux_factor(seu3_c2, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;GMM-Demux&quot;, &quot;gmm_out_batch3_c2&quot;, &quot;full_report&quot;), HTO_list_batch3) </code></pre>
+</div>
+<div id="demultiplex" class="section level3">
+<h3>deMULTIplex</h3>
+<p>Next is deMULTIplex, using the Seurat wrapper function MULTIseqDemux
+for this</p>
+<pre class="r"><code>seu1_c1$deMULTIplex_calls &lt;- MULTIseqDemux(seu1_c1, autoThresh = TRUE)$MULTI_ID</code></pre>
+<pre><code>Iteration 1</code></pre>
+<pre><code>Using quantile 0.35</code></pre>
+<pre><code>Iteration 2</code></pre>
+<pre><code>Using quantile 0.35</code></pre>
+<pre><code>Iteration 3</code></pre>
+<pre><code>Using quantile 0.35</code></pre>
+<pre class="r"><code>seu1_c2$deMULTIplex_calls &lt;- MULTIseqDemux(seu1_c2, autoThresh = TRUE)$MULTI_ID</code></pre>
+<pre><code>Iteration 1
+Using quantile 0.35</code></pre>
+<pre><code>Iteration 2</code></pre>
+<pre><code>Using quantile 0.35</code></pre>
+<pre><code>Iteration 3</code></pre>
+<pre><code>Using quantile 0.35</code></pre>
+<pre><code>Iteration 4</code></pre>
+<pre><code>Using quantile 0.35</code></pre>
+<pre class="r"><code>seu2_c1$deMULTIplex_calls &lt;- MULTIseqDemux(seu2_c1, autoThresh = TRUE)$MULTI_ID</code></pre>
+<pre><code>Iteration 1
+Using quantile 0.35</code></pre>
+<pre><code>Iteration 2</code></pre>
+<pre><code>Using quantile 0.35</code></pre>
+<pre><code>Iteration 3</code></pre>
+<pre><code>Using quantile 0.35</code></pre>
+<pre class="r"><code>seu2_c2$deMULTIplex_calls &lt;- MULTIseqDemux(seu2_c2, autoThresh = TRUE)$MULTI_ID</code></pre>
+<pre><code>Iteration 1</code></pre>
+<pre><code>Using quantile 0.3</code></pre>
+<pre><code>Iteration 2</code></pre>
+<pre><code>Using quantile 0.3</code></pre>
+<pre><code>Iteration 3</code></pre>
+<pre><code>Using quantile 0.3</code></pre>
+<pre class="r"><code>seu3_c1$deMULTIplex_calls &lt;- MULTIseqDemux(seu3_c1, autoThresh = TRUE)$MULTI_ID</code></pre>
+<pre><code>Iteration 1</code></pre>
+<pre><code>Using quantile 0.45</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>Iteration 2</code></pre>
+<pre><code>Using quantile 0.45</code></pre>
+<pre><code>No threshold found for BAL 19...</code></pre>
+<pre><code>No threshold found for BAL 23...</code></pre>
+<pre><code>No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...
+No threshold found for BAL 22...</code></pre>
+<pre><code>Iteration 3</code></pre>
+<pre><code>Using quantile 0.45</code></pre>
+<pre><code>No threshold found for BAL 22...</code></pre>
+<pre><code>Iteration 4</code></pre>
+<pre><code>Using quantile 0.55</code></pre>
+<pre><code>Iteration 5</code></pre>
+<pre><code>Using quantile 0.55</code></pre>
+<pre class="r"><code>seu3_c2$deMULTIplex_calls &lt;- MULTIseqDemux(seu3_c2, autoThresh = TRUE)$MULTI_ID</code></pre>
+<pre><code>Iteration 1</code></pre>
+<pre><code>Using quantile 0.35</code></pre>
+<pre><code>Iteration 2</code></pre>
+<pre><code>Using quantile 0.35</code></pre>
+<pre><code>Iteration 3</code></pre>
+<pre><code>Using quantile 0.35</code></pre>
+</div>
+<div id="bff" class="section level3">
+<h3>BFF</h3>
+<p>CellhashR’s BFF_raw and BFF_cluster methods. Need to run this on the
+raw counts matrix</p>
+<pre class="r"><code>cellhashR_calls &lt;- GenerateCellHashingCalls(barcodeMatrix = batch1_c1_counts, methods = c(&quot;bff_raw&quot;, &quot;bff_cluster&quot;), doTSNE = FALSE, doHeatmap = FALSE)</code></pre>
+<pre><code>[1] &quot;Converting input data.frame to a matrix&quot;
+[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 0 of 8&quot;
+[1] &quot;Running BFF_raw&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 08: 88.5286373638308&quot;
+[1] &quot;BAL 07: 79.0940963329433&quot;
+[1] &quot;BAL 06: 59.3081555250612&quot;
+[1] &quot;BAL 05: 118.254083321895&quot;
+[1] &quot;BAL 04: 40.1613960189724&quot;
+[1] &quot;BAL 03: 94.3265319348506&quot;
+[1] &quot;BAL 02: 888.584445369128&quot;
+[1] &quot;BAL 01: 103.138027031719&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-8.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-9.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-10.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 0 of 8&quot;
+[1] &quot;Running BFF_cluster&quot;
+[1] &quot;Doublet threshold:  0.05&quot;
+[1] &quot;Neg threshold:  0.05&quot;
+[1] &quot;Min distance as fraction of distance between peaks:  0.1&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-11.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 08: 88.5286373638308&quot;
+[1] &quot;BAL 07: 79.0940963329433&quot;
+[1] &quot;BAL 06: 59.3081555250612&quot;
+[1] &quot;BAL 05: 118.254083321895&quot;
+[1] &quot;BAL 04: 40.1613960189724&quot;
+[1] &quot;BAL 03: 94.3265319348506&quot;
+[1] &quot;BAL 02: 888.584445369128&quot;
+[1] &quot;BAL 01: 103.138027031719&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-12.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-13.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-14.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-15.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-16.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-17.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-18.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-19.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-20.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-21.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-22.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Generating consensus calls&quot;
+[1] &quot;Consensus calls will be generated using: bff_raw,bff_cluster&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-23.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-24.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Total concordant: 10754&quot;
+[1] &quot;Total discordant: 825 (7.12%)&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-25.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-26.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>seu1_c1$BFF_raw_calls &lt;- cellhashR_calls$bff_raw
+seu1_c1$BFF_cluster_calls &lt;- cellhashR_calls$bff_cluster
+
+cellhashR_calls &lt;- GenerateCellHashingCalls(barcodeMatrix = batch1_c2_counts, methods = c(&quot;bff_raw&quot;, &quot;bff_cluster&quot;), doTSNE = FALSE, doHeatmap = FALSE)</code></pre>
+<pre><code>[1] &quot;Converting input data.frame to a matrix&quot;
+[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 0 of 8&quot;
+[1] &quot;Running BFF_raw&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-27.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 08: 153.703282800423&quot;
+[1] &quot;BAL 07: 133.643246005432&quot;
+[1] &quot;BAL 06: 96.3579502744319&quot;
+[1] &quot;BAL 05: 173.236542609504&quot;
+[1] &quot;BAL 04: 100.863612367615&quot;
+[1] &quot;BAL 03: 124.030608336188&quot;
+[1] &quot;BAL 02: 227.676246125818&quot;
+[1] &quot;BAL 01: 269.704047931178&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-28.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-29.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-30.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-31.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-32.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-33.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-34.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-35.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-36.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 0 of 8&quot;
+[1] &quot;Running BFF_cluster&quot;
+[1] &quot;Doublet threshold:  0.05&quot;
+[1] &quot;Neg threshold:  0.05&quot;
+[1] &quot;Min distance as fraction of distance between peaks:  0.1&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-37.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 08: 153.703282800423&quot;
+[1] &quot;BAL 07: 133.643246005432&quot;
+[1] &quot;BAL 06: 96.3579502744319&quot;
+[1] &quot;BAL 05: 173.236542609504&quot;
+[1] &quot;BAL 04: 100.863612367615&quot;
+[1] &quot;BAL 03: 124.030608336188&quot;
+[1] &quot;BAL 02: 227.676246125818&quot;
+[1] &quot;BAL 01: 269.704047931178&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-38.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-39.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-40.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-41.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-42.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-43.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-44.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-45.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-46.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-47.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-48.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Generating consensus calls&quot;
+[1] &quot;Consensus calls will be generated using: bff_raw,bff_cluster&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-49.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-50.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Total concordant: 11221&quot;
+[1] &quot;Total discordant: 1291 (10.32%)&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-51.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-29-52.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>seu1_c2$BFF_raw_calls &lt;- cellhashR_calls$bff_raw
+seu1_c2$BFF_cluster_calls &lt;- cellhashR_calls$bff_cluster</code></pre>
+<pre class="r"><code>cellhashR_calls &lt;- GenerateCellHashingCalls(barcodeMatrix = batch2_c1_counts, methods = c(&quot;bff_raw&quot;, &quot;bff_cluster&quot;), doTSNE = FALSE, doHeatmap = FALSE)</code></pre>
+<pre><code>[1] &quot;Converting input data.frame to a matrix&quot;
+[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 0 of 8&quot;
+[1] &quot;Running BFF_raw&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 10&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 13&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 14&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 16: 116.767395768808&quot;
+[1] &quot;BAL 15: 92.8420586232944&quot;
+[1] &quot;BAL 14: 174971.187265843&quot;
+[1] &quot;BAL 13: 34516.284451742&quot;
+[1] &quot;BAL 12: 100.081954141623&quot;
+[1] &quot;BAL 11: 42.8472794350699&quot;
+[1] &quot;BAL 10: 3964.00460172807&quot;
+[1] &quot;BAL 09: 141.060749374794&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-8.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-9.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-10.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 0 of 8&quot;
+[1] &quot;Running BFF_cluster&quot;
+[1] &quot;Doublet threshold:  0.05&quot;
+[1] &quot;Neg threshold:  0.05&quot;
+[1] &quot;Min distance as fraction of distance between peaks:  0.1&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 10&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 13&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 14&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-11.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 16: 116.767395768808&quot;
+[1] &quot;BAL 15: 92.8420586232944&quot;
+[1] &quot;BAL 14: 174971.187265843&quot;
+[1] &quot;BAL 13: 34516.284451742&quot;
+[1] &quot;BAL 12: 100.081954141623&quot;
+[1] &quot;BAL 11: 42.8472794350699&quot;
+[1] &quot;BAL 10: 3964.00460172807&quot;
+[1] &quot;BAL 09: 141.060749374794&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 10&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 13&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 14&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-12.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Smoothing parameter j = 5&quot;
+[1] &quot;Smoothing parameter j = 10&quot;
+[1] &quot;Smoothing parameter j = 15&quot;
+[1] &quot;Smoothing parameter j = 20&quot;
+[1] &quot;Smoothing parameter j = 25&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-13.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-14.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-15.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-16.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-17.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-18.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-19.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-20.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-21.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-22.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Generating consensus calls&quot;
+[1] &quot;Consensus calls will be generated using: bff_raw,bff_cluster&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-23.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-24.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Total concordant: 9521&quot;
+[1] &quot;Total discordant: 14514 (60.39%)&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-25.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-26.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>seu2_c1$BFF_raw_calls &lt;- cellhashR_calls$bff_raw
+seu2_c1$BFF_cluster_calls &lt;- cellhashR_calls$bff_cluster
+
+cellhashR_calls &lt;- GenerateCellHashingCalls(barcodeMatrix = batch2_c2_counts, methods = c(&quot;bff_raw&quot;, &quot;bff_cluster&quot;), doTSNE = FALSE, doHeatmap = FALSE)</code></pre>
+<pre><code>[1] &quot;Converting input data.frame to a matrix&quot;
+[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 0 of 8&quot;
+[1] &quot;Running BFF_raw&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 10&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 14&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-27.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 16: 144.087607973687&quot;
+[1] &quot;BAL 15: 99.1574648213469&quot;
+[1] &quot;BAL 14: 540748.32248393&quot;
+[1] &quot;BAL 13: 112.760207720256&quot;
+[1] &quot;BAL 12: 121.974958078504&quot;
+[1] &quot;BAL 11: 44.1513268472175&quot;
+[1] &quot;BAL 10: 9749.73495120045&quot;
+[1] &quot;BAL 09: 115.609426366988&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-28.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-29.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-30.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-31.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-32.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-33.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-34.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-35.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-36.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 0 of 8&quot;
+[1] &quot;Running BFF_cluster&quot;
+[1] &quot;Doublet threshold:  0.05&quot;
+[1] &quot;Neg threshold:  0.05&quot;
+[1] &quot;Min distance as fraction of distance between peaks:  0.1&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 10&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 14&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-37.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 16: 144.087607973687&quot;
+[1] &quot;BAL 15: 99.1574648213469&quot;
+[1] &quot;BAL 14: 540748.32248393&quot;
+[1] &quot;BAL 13: 112.760207720256&quot;
+[1] &quot;BAL 12: 121.974958078504&quot;
+[1] &quot;BAL 11: 44.1513268472175&quot;
+[1] &quot;BAL 10: 9749.73495120045&quot;
+[1] &quot;BAL 09: 115.609426366988&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 10&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 14&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-38.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Smoothing parameter j = 5&quot;
+[1] &quot;Smoothing parameter j = 10&quot;
+[1] &quot;Smoothing parameter j = 15&quot;
+[1] &quot;Smoothing parameter j = 20&quot;
+[1] &quot;Smoothing parameter j = 25&quot;
+[1] &quot;Smoothing parameter j = 30&quot;
+[1] &quot;Smoothing parameter j = 35&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-39.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-40.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-41.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-42.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-43.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-44.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-45.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-46.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-47.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-48.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Generating consensus calls&quot;
+[1] &quot;Consensus calls will be generated using: bff_raw,bff_cluster&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-49.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-50.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Total concordant: 9488&quot;
+[1] &quot;Total discordant: 15318 (61.75%)&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-51.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-30-52.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>seu2_c2$BFF_raw_calls &lt;- cellhashR_calls$bff_raw
+seu2_c2$BFF_cluster_calls &lt;- cellhashR_calls$bff_cluster</code></pre>
+<pre class="r"><code>cellhashR_calls &lt;- GenerateCellHashingCalls(barcodeMatrix = batch3_c1_counts, methods = c(&quot;bff_raw&quot;, &quot;bff_cluster&quot;), doTSNE = FALSE, doHeatmap = FALSE)</code></pre>
+<pre><code>[1] &quot;Converting input data.frame to a matrix&quot;
+[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 2 of 8&quot;
+[1] &quot;Running BFF_raw&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 17&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 23&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 24: 71.9803810612437&quot;
+[1] &quot;BAL 23: 52018.8671908447&quot;
+[1] &quot;BAL 20: 60.4478104537598&quot;
+[1] &quot;BAL 19: 23.2836098685648&quot;
+[1] &quot;BAL 18: 63.4207352591075&quot;
+[1] &quot;BAL 17: 44498.4901677433&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-2.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-3.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-4.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-5.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-6.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-7.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-8.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 2 of 8&quot;
+[1] &quot;Running BFF_cluster&quot;
+[1] &quot;Doublet threshold:  0.05&quot;
+[1] &quot;Neg threshold:  0.05&quot;
+[1] &quot;Min distance as fraction of distance between peaks:  0.1&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 17&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 23&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-9.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 24: 71.9803810612437&quot;
+[1] &quot;BAL 23: 52018.8671908447&quot;
+[1] &quot;BAL 20: 60.4478104537598&quot;
+[1] &quot;BAL 19: 23.2836098685648&quot;
+[1] &quot;BAL 18: 63.4207352591075&quot;
+[1] &quot;BAL 17: 44498.4901677433&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 23&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-10.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Smoothing parameter j = 5&quot;
+[1] &quot;Smoothing parameter j = 10&quot;
+[1] &quot;Smoothing parameter j = 15&quot;
+[1] &quot;Smoothing parameter j = 20&quot;
+[1] &quot;Smoothing parameter j = 25&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-11.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-12.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-13.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-14.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-15.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-16.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-17.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-18.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Generating consensus calls&quot;
+[1] &quot;Consensus calls will be generated using: bff_raw,bff_cluster&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-19.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-20.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Total concordant: 24809&quot;
+[1] &quot;Total discordant: 6422 (20.56%)&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-21.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-22.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>seu3_c1$BFF_raw_calls &lt;- cellhashR_calls$bff_raw
+seu3_c1$BFF_cluster_calls &lt;- cellhashR_calls$bff_cluster
+
+cellhashR_calls &lt;- GenerateCellHashingCalls(barcodeMatrix = batch3_c2_counts, methods = c(&quot;bff_raw&quot;, &quot;bff_cluster&quot;), doTSNE = FALSE, doHeatmap = FALSE)</code></pre>
+<pre><code>[1] &quot;Converting input data.frame to a matrix&quot;
+[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 0 of 8&quot;
+[1] &quot;Running BFF_raw&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 17&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 21&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-23.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 24: 91.8521103309011&quot;
+[1] &quot;BAL 23: 78.3116370807488&quot;
+[1] &quot;BAL 22: 40.8624667015159&quot;
+[1] &quot;BAL 21: 2928.84132708352&quot;
+[1] &quot;BAL 20: 78.9682591903001&quot;
+[1] &quot;BAL 19: 31.11498098035&quot;
+[1] &quot;BAL 18: 90.8327820367026&quot;
+[1] &quot;BAL 17: 203945.401462095&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-24.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-25.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-26.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-27.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-28.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-29.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-30.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-31.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-32.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Starting BFF&quot;
+[1] &quot;rows dropped for low counts: 0 of 8&quot;
+[1] &quot;Running BFF_cluster&quot;
+[1] &quot;Doublet threshold:  0.05&quot;
+[1] &quot;Neg threshold:  0.05&quot;
+[1] &quot;Min distance as fraction of distance between peaks:  0.1&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 17&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 21&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-33.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Thresholds:&quot;
+[1] &quot;BAL 24: 91.8521103309011&quot;
+[1] &quot;BAL 23: 78.3116370807488&quot;
+[1] &quot;BAL 22: 40.8624667015159&quot;
+[1] &quot;BAL 21: 2928.84132708352&quot;
+[1] &quot;BAL 20: 78.9682591903001&quot;
+[1] &quot;BAL 19: 31.11498098035&quot;
+[1] &quot;BAL 18: 90.8327820367026&quot;
+[1] &quot;BAL 17: 203945.401462095&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 17&quot;
+[1] &quot;Only one peak found, using max value as cutoff: BAL 21&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-34.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Smoothing parameter j = 5&quot;
+[1] &quot;Smoothing parameter j = 10&quot;
+[1] &quot;Smoothing parameter j = 15&quot;
+[1] &quot;Smoothing parameter j = 20&quot;
+[1] &quot;Smoothing parameter j = 25&quot;
+[1] &quot;Smoothing parameter j = 30&quot;
+[1] &quot;Smoothing parameter j = 35&quot;
+[1] &quot;Smoothing parameter j = 40&quot;
+[1] &quot;Smoothing parameter j = 45&quot;
+[1] &quot;Smoothing parameter j = 50&quot;
+[1] &quot;Smoothing parameter j = 55&quot;
+[1] &quot;Smoothing parameter j = 60&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-35.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-36.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-37.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-38.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-39.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-40.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-41.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-42.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-43.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-44.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Generating consensus calls&quot;
+[1] &quot;Consensus calls will be generated using: bff_raw,bff_cluster&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-45.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-46.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>[1] &quot;Total concordant: 12770&quot;
+[1] &quot;Total discordant: 18305 (58.91%)&quot;</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-47.png" width="672" style="display: block; margin: auto;" /><img src="figure/BAL_analysis.Rmd/unnamed-chunk-31-48.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>seu3_c2$BFF_raw_calls &lt;- cellhashR_calls$bff_raw
+seu3_c2$BFF_cluster_calls &lt;- cellhashR_calls$bff_cluster</code></pre>
+</div>
+<div id="demuxmix" class="section level3">
+<h3>demuxmix</h3>
+<p>This has two flavours, one which takes into account the RNA library
+size and one which works just on the hashtag libraries. The latter
+doesn’t change the results much and requires the RNA counts matrix so
+we’ll just use the basic version.</p>
+<p>This function turns the output of demuxmix into something consistent
+with the other methods</p>
+<pre class="r"><code>demuxmix_calls_consistent &lt;- function(seurat_object, model = &quot;naive&quot;, hto_list) {
+  hto_counts &lt;- as.matrix(GetAssayData(seurat_object[[&quot;HTO&quot;]], slot = &quot;counts&quot;))
+  dmm &lt;- demuxmix(hto_counts, model = model)
+  dmm_calls &lt;- dmmClassify(dmm)
+  calls_out &lt;- case_when(dmm_calls$HTO %in% hto_list ~ dmm_calls$HTO,
+               !dmm_calls$HTO %in% hto_list ~ case_when(
+                 dmm_calls$Type == &quot;multiplet&quot; ~ &quot;Doublet&quot;,
+                 dmm_calls$Type %in% c(&quot;negative&quot;, &quot;uncertain&quot;) ~ &quot;Negative&quot;)
+               )
+  return(as.factor(calls_out))
+}</code></pre>
+<pre class="r"><code>seu1_c1$demuxmix_calls &lt;- demuxmix_calls_consistent(seu1_c1, hto_list = HTO_list_batch1)
+seu1_c2$demuxmix_calls &lt;- demuxmix_calls_consistent(seu1_c2, hto_list = HTO_list_batch1)
+
+seu2_c1$demuxmix_calls &lt;- demuxmix_calls_consistent(seu2_c1, hto_list = HTO_list_batch2)
+seu2_c2$demuxmix_calls &lt;- demuxmix_calls_consistent(seu2_c2, hto_list = HTO_list_batch2)
+
+seu3_c1$demuxmix_calls &lt;- demuxmix_calls_consistent(seu3_c1, hto_list = HTO_list_batch3)
+seu3_c2$demuxmix_calls &lt;- demuxmix_calls_consistent(seu3_c2, hto_list = HTO_list_batch3)</code></pre>
+<p>Merge the captures back into the batches</p>
+<pre class="r"><code>seu1 &lt;- merge(seu1_c1, seu1_c2)
+seu2 &lt;- merge(seu2_c1, seu2_c2)
+seu3 &lt;- merge(seu3_c1, seu3_c2)</code></pre>
+<p>Add a factor for batches</p>
+<pre class="r"><code>seu1$Batch &lt;- &quot;Batch 1&quot;
+seu2$Batch &lt;- &quot;Batch 2&quot;
+seu3$Batch &lt;- &quot;Batch 3&quot;</code></pre>
+<p>Save Seurat objects with all the hashtag assignments</p>
+<pre class="r"><code>#saveRDS(seu1, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch1_all_methods.SEU.rds&quot;))
+#saveRDS(seu2, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch2_all_methods.SEU.rds&quot;))
+#saveRDS(seu3, here(&quot;data&quot;, &quot;BAL_data&quot;, &quot;batch3_all_methods.SEU.rds&quot;))</code></pre>
+</div>
+</div>
+<div id="plots" class="section level2">
+<h2>Plots</h2>
+<p>We’re looking at the fraction of droplets each method (including
+genetics) assigns as either singlet, doublet or negative (Figure 2).</p>
+<pre class="r"><code>method_calls &lt;- c(&quot;hashedDrops_calls&quot;, 
+                  &quot;hashedDrops_default_calls&quot;, 
+                  &quot;hashsolo_calls&quot;, 
+                  &quot;HTODemux_calls&quot;, 
+                  &quot;GMMDemux_calls&quot;,
+                  &quot;deMULTIplex_calls&quot;, 
+                  &quot;BFF_raw_calls&quot;, 
+                  &quot;BFF_cluster_calls&quot;, 
+                  &quot;demuxmix_calls&quot;)
+
+for (method in method_calls){ 
+  seu1[[gsub(method, paste0(method, &quot;_donors&quot;), method)]] &lt;- as.factor(unlist(HTO_list_batch1[unlist(seu1[[method]])]))
+  seu2[[gsub(method, paste0(method, &quot;_donors&quot;), method)]] &lt;- as.factor(unlist(HTO_list_batch2[unlist(seu2[[method]])]))
+  seu3[[gsub(method, paste0(method, &quot;_donors&quot;), method)]] &lt;- as.factor(unlist(HTO_list_batch3[unlist(seu3[[method]])]))
+}
+
+seu &lt;- merge(seu1, c(seu2, seu3))</code></pre>
+<pre><code>Warning in CheckDuplicateCellNames(object.list = objects): Some cell names are
+duplicated across objects provided. Renaming to enforce unique cell names.</code></pre>
+<pre class="r"><code>seu$Batch &lt;- as.factor(seu$Batch)</code></pre>
+<p>Need to make a factor which reduces the assignments to one of
+(“Singlet”, “Doublet”, “Negative”).</p>
+<pre class="r"><code>sd_or_u_hashtags &lt;- function(seurat_object, method) {
+  return(case_when(seurat_object[[method]] == &quot;Doublet&quot; ~ &quot;Doublet&quot;,
+            seurat_object[[method]] == &quot;Negative&quot; ~ &quot;Negative&quot;,
+            TRUE ~ &quot;Singlet&quot;))
+}
+
+for (method in method_calls) {
+  seu[[gsub(method, paste0(method, &quot;_category&quot;), method)]] &lt;- sd_or_u_hashtags(seu, method)
+}
+seu$genetic_donor_category &lt;- case_when(seu$genetic_donor == &quot;Doublet&quot; ~ &quot;Doublet&quot;,
+                                        seu$genetic_donor == &quot;Negative&quot; ~ &quot;Negative&quot;,
+                                        TRUE ~ &quot;Singlet&quot;)</code></pre>
+<pre class="r"><code>p1 &lt;- dittoBarPlot(seu, var = &quot;genetic_donor_category&quot;, group.by = &quot;Batch&quot;) + NoLegend() +
+  ggtitle(&quot;vireo (genetics)&quot;) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.text.x = element_blank())
+p2 &lt;- dittoBarPlot(seu, var = &quot;BFF_cluster_calls_category&quot;, group.by = &quot;Batch&quot;) + NoLegend() + 
+  ggtitle(&quot;BFF_cluster&quot;) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.text.x = element_blank(), axis.text.y = element_blank())
+p3 &lt;- dittoBarPlot(seu, var = &quot;BFF_raw_calls_category&quot;, group.by = &quot;Batch&quot;) + NoLegend() + 
+  ggtitle(&quot;BFF_raw&quot;) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.text.x = element_blank())
+p4 &lt;- dittoBarPlot(seu, var = &quot;deMULTIplex_calls_category&quot;, group.by = &quot;Batch&quot;) + 
+  ggtitle(&quot;deMULTIplex&quot;) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.text.x = element_blank(), axis.text.y = element_blank())
+p5 &lt;- dittoBarPlot(seu, var = &quot;demuxmix_calls_category&quot;, group.by = &quot;Batch&quot;) + NoLegend() +
+  ggtitle(&quot;demuxmix&quot;) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.text.x = element_blank())
+p6 &lt;- dittoBarPlot(seu, var = &quot;GMMDemux_calls_category&quot;, group.by = &quot;Batch&quot;) + NoLegend() + 
+  ggtitle(&quot;GMM-Demux&quot;) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.text.x = element_blank(), axis.text.y = element_blank())
+p7 &lt;- dittoBarPlot(seu, var = &quot;hashedDrops_calls_category&quot;, group.by = &quot;Batch&quot;) + NoLegend() + 
+  ggtitle(&quot;hashedDrops - best&quot;) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.text.x = element_blank())
+p8 &lt;- dittoBarPlot(seu, var = &quot;hashedDrops_default_calls_category&quot;, group.by = &quot;Batch&quot;) + NoLegend() + 
+  ggtitle(&quot;hashedDrops - default&quot;) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.text.x = element_blank(), axis.text.y = element_blank())
+p9 &lt;- dittoBarPlot(seu, var = &quot;hashsolo_calls_category&quot;, group.by = &quot;Batch&quot;) + NoLegend() +
+  ggtitle(&quot;HashSolo&quot;) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.text.x = element_text(size = 14))
+p10 &lt;- dittoBarPlot(seu, var = &quot;HTODemux_calls_category&quot;, group.by = &quot;Batch&quot;) + NoLegend() +
+  ggtitle(&quot;HTODemux&quot;) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.text.x = element_text(size = 14), axis.text.y = element_blank())
+
+(p1 + p2) / (p3 + p4) / (p5 + p6) / (p7 + p8) / (p9 + p10)</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-39-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#ggsave(&quot;category_fractions.png&quot;,
+#       plot = (p1 + p2) / (p3 + p4) / (p5 + p6) / (p7 + p8) / (p9 + p10),
+#       device = &quot;png&quot;,
+#       path = here(&quot;figures&quot;),
+#       width = 8, height = 10,
+#       units = &quot;in&quot;,
+#       dpi = 350)</code></pre>
+<div id="calculating-f-score" class="section level3">
+<h3>Calculating F-score</h3>
+<p>We compute the F-score of each of the possible singlet assignments in
+each batch.</p>
+<pre class="r"><code>#Helper function
+calculate_HTO_fscore &lt;- function(seurat_object, donor_hto_list, method) {
+  calls &lt;- seurat_object[[method]]
+  f &lt;- NULL
+  for (HTO in donor_hto_list) {
+    tp &lt;- sum(calls == HTO &amp; donor_hto_list[seurat_object$genetic_donor] == HTO) #True positive rate
+    fp &lt;- sum(calls == HTO &amp; donor_hto_list[seurat_object$genetic_donor] != HTO) #False positive rate
+    fn &lt;- sum(calls != HTO &amp; donor_hto_list[seurat_object$genetic_donor] == HTO) #False negative rate
+    f &lt;- c(f, tp / (tp + 0.5 * (fp + fn)))
+  }
+
+  f &lt;- c(f, mean(f)) #Add mean F score
+
+  names(f) &lt;- c(donor_hto_list, &quot;Average&quot;)
+  
+  return(f)
+}</code></pre>
+<pre class="r"><code>Fscore_hashedDrops_batch1 &lt;- calculate_HTO_fscore(seu1, donor_list_batch1[1:8], &quot;hashedDrops_calls&quot;)
+Fscore_hashedDrops_batch2 &lt;- calculate_HTO_fscore(seu2, donor_list_batch2[1:8], &quot;hashedDrops_calls&quot;)
+Fscore_hashedDrops_batch3 &lt;- calculate_HTO_fscore(seu3, donor_list_batch3[1:8], &quot;hashedDrops_calls&quot;)
+
+Fscore_hashedDrops_default_batch1 &lt;- calculate_HTO_fscore(seu1, donor_list_batch1[1:8], &quot;hashedDrops_default_calls&quot;)
+Fscore_hashedDrops_default_batch2 &lt;- calculate_HTO_fscore(seu2, donor_list_batch2[1:8], &quot;hashedDrops_default_calls&quot;)
+Fscore_hashedDrops_default_batch3 &lt;- calculate_HTO_fscore(seu3, donor_list_batch3[1:8], &quot;hashedDrops_default_calls&quot;)
+
+Fscore_hashsolo_batch1 &lt;- calculate_HTO_fscore(seu1, donor_list_batch1[1:8], &quot;hashsolo_calls&quot;)
+Fscore_hashsolo_batch2 &lt;- calculate_HTO_fscore(seu2, donor_list_batch2[1:8], &quot;hashsolo_calls&quot;)
+Fscore_hashsolo_batch3 &lt;- calculate_HTO_fscore(seu3, donor_list_batch3[1:8], &quot;hashsolo_calls&quot;)
+
+Fscore_HTODemux_batch1 &lt;- calculate_HTO_fscore(seu1, donor_list_batch1[1:8], &quot;HTODemux_calls&quot;)
+Fscore_HTODemux_batch2 &lt;- calculate_HTO_fscore(seu2, donor_list_batch2[1:8], &quot;HTODemux_calls&quot;)
+Fscore_HTODemux_batch3 &lt;- calculate_HTO_fscore(seu3, donor_list_batch3[1:8], &quot;HTODemux_calls&quot;)
+
+Fscore_GMMDemux_batch1 &lt;- calculate_HTO_fscore(seu1, donor_list_batch1[1:8], &quot;GMMDemux_calls&quot;)
+Fscore_GMMDemux_batch2 &lt;- calculate_HTO_fscore(seu2, donor_list_batch2[1:8], &quot;GMMDemux_calls&quot;)
+Fscore_GMMDemux_batch3 &lt;- calculate_HTO_fscore(seu3, donor_list_batch3[1:8], &quot;GMMDemux_calls&quot;)
+
+Fscore_deMULTIplex_batch1 &lt;- calculate_HTO_fscore(seu1, donor_list_batch1[1:8], &quot;deMULTIplex_calls&quot;)
+Fscore_deMULTIplex_batch2 &lt;- calculate_HTO_fscore(seu2, donor_list_batch2[1:8], &quot;deMULTIplex_calls&quot;)
+Fscore_deMULTIplex_batch3 &lt;- calculate_HTO_fscore(seu3, donor_list_batch3[1:8], &quot;deMULTIplex_calls&quot;)
+
+Fscore_BFF_raw_batch1 &lt;- calculate_HTO_fscore(seu1, donor_list_batch1[1:8], &quot;BFF_raw_calls&quot;)
+Fscore_BFF_raw_batch2 &lt;- calculate_HTO_fscore(seu2, donor_list_batch2[1:8], &quot;BFF_raw_calls&quot;)
+Fscore_BFF_raw_batch3 &lt;- calculate_HTO_fscore(seu3, donor_list_batch3[1:8], &quot;BFF_raw_calls&quot;)
+
+Fscore_BFF_cluster_batch1 &lt;- calculate_HTO_fscore(seu1, donor_list_batch1[1:8], &quot;BFF_cluster_calls&quot;)
+Fscore_BFF_cluster_batch2 &lt;- calculate_HTO_fscore(seu2, donor_list_batch2[1:8], &quot;BFF_cluster_calls&quot;)
+Fscore_BFF_cluster_batch3 &lt;- calculate_HTO_fscore(seu3, donor_list_batch3[1:8], &quot;BFF_cluster_calls&quot;)
+
+Fscore_demuxmix_batch1 &lt;- calculate_HTO_fscore(seu1, donor_list_batch1[1:8], &quot;demuxmix_calls&quot;)
+Fscore_demuxmix_batch2 &lt;- calculate_HTO_fscore(seu2, donor_list_batch2[1:8], &quot;demuxmix_calls&quot;)
+Fscore_demuxmix_batch3 &lt;- calculate_HTO_fscore(seu3, donor_list_batch3[1:8], &quot;demuxmix_calls&quot;)</code></pre>
+<p>Put it all together for visualisation</p>
+<pre class="r"><code>Fscore_matrix_batch1 &lt;- data.frame(&quot;HTO&quot; = c(HTO_list_batch1[1:8], &quot;Mean (Batch 1)&quot;),#&quot;Median&quot;),
+                            &quot;hashedDrops&quot; = Fscore_hashedDrops_batch1,
+                            &quot;hashedDrops_default&quot; = Fscore_hashedDrops_default_batch1,
+                            &quot;HashSolo&quot; = Fscore_hashsolo_batch1,
+                            &quot;HTODemux&quot; = Fscore_HTODemux_batch1,
+                            &quot;GMM_Demux&quot; = Fscore_GMMDemux_batch1,
+                            &quot;deMULTIplex&quot; = Fscore_deMULTIplex_batch1,
+                            &quot;BFF_raw&quot; = Fscore_BFF_raw_batch1,
+                            &quot;BFF_cluster&quot; = Fscore_BFF_cluster_batch1,
+                            &quot;demuxmix&quot; = Fscore_demuxmix_batch1) %&gt;%
+  pivot_longer(cols = c(&quot;hashedDrops&quot;, &quot;hashedDrops_default&quot;, &quot;HashSolo&quot;,
+                        &quot;HTODemux&quot;, &quot;GMM_Demux&quot;, &quot;deMULTIplex&quot;, 
+                        &quot;BFF_raw&quot;, &quot;BFF_cluster&quot;, &quot;demuxmix&quot;),
+               names_to = &quot;method&quot;,
+               values_to = &quot;Fscore&quot;)
+
+Fscore_matrix_batch2 &lt;- data.frame(&quot;HTO&quot; = c(HTO_list_batch2[1:8], &quot;Mean (Batch 2)&quot;),#&quot;Median&quot;),
+                            &quot;hashedDrops&quot; = Fscore_hashedDrops_batch2,
+                            &quot;hashedDrops_default&quot; = Fscore_hashedDrops_default_batch2,
+                            &quot;HashSolo&quot; = Fscore_hashsolo_batch2,
+                            &quot;HTODemux&quot; = Fscore_HTODemux_batch2,
+                            &quot;GMM_Demux&quot; = Fscore_GMMDemux_batch2,
+                            &quot;deMULTIplex&quot; = Fscore_deMULTIplex_batch2,
+                            &quot;BFF_raw&quot; = Fscore_BFF_raw_batch2,
+                            &quot;BFF_cluster&quot; = Fscore_BFF_cluster_batch2,
+                            &quot;demuxmix&quot; = Fscore_demuxmix_batch2) %&gt;%
+  pivot_longer(cols = c(&quot;hashedDrops&quot;, &quot;hashedDrops_default&quot;, &quot;HashSolo&quot;,
+                        &quot;HTODemux&quot;, &quot;GMM_Demux&quot;, &quot;deMULTIplex&quot;, 
+                        &quot;BFF_raw&quot;, &quot;BFF_cluster&quot;, &quot;demuxmix&quot;),
+               names_to = &quot;method&quot;,
+               values_to = &quot;Fscore&quot;)
+
+Fscore_matrix_batch3 &lt;- data.frame(&quot;HTO&quot; = c(HTO_list_batch3[1:8], &quot;Mean (Batch 3)&quot;),# &quot;Median&quot;),
+                            &quot;hashedDrops&quot; = Fscore_hashedDrops_batch3,
+                            &quot;hashedDrops_default&quot; = Fscore_hashedDrops_default_batch3,
+                            &quot;HashSolo&quot; = Fscore_hashsolo_batch3,
+                            &quot;HTODemux&quot; = Fscore_HTODemux_batch3,
+                            &quot;GMM_Demux&quot; = Fscore_GMMDemux_batch3,
+                            &quot;deMULTIplex&quot; = Fscore_deMULTIplex_batch3,
+                            &quot;BFF_raw&quot; = Fscore_BFF_raw_batch3,
+                            &quot;BFF_cluster&quot; = Fscore_BFF_cluster_batch3,
+                            &quot;demuxmix&quot; = Fscore_demuxmix_batch3) %&gt;%
+  pivot_longer(cols = c(&quot;hashedDrops&quot;, &quot;hashedDrops_default&quot;, &quot;HashSolo&quot;,
+                        &quot;HTODemux&quot;, &quot;GMM_Demux&quot;, &quot;deMULTIplex&quot;, 
+                        &quot;BFF_raw&quot;, &quot;BFF_cluster&quot;, &quot;demuxmix&quot;), 
+               names_to = &quot;method&quot;,
+               values_to = &quot;Fscore&quot;)</code></pre>
+<p>It’ll be a bit easier to comprehend all of this if we can put the
+above plots into a heatmap. Rows are methods, columns are samples,
+colour scale is F score</p>
+<pre class="r"><code>Fscore_matrix_batch1$Batch &lt;- &quot;Batch 1&quot;
+Fscore_matrix_batch2$Batch &lt;- &quot;Batch 2&quot;
+Fscore_matrix_batch3$Batch &lt;- &quot;Batch 3&quot;
+
+Fscore_matrix &lt;- bind_rows(Fscore_matrix_batch1,
+                           Fscore_matrix_batch2,
+                           Fscore_matrix_batch3)
+
+Fscore_matrix &lt;- Fscore_matrix[!Fscore_matrix$HTO %in% c(&quot;Mean (Batch 1)&quot;, &quot;Mean (Batch 2)&quot;, &quot;Mean (Batch 3)&quot;), ]</code></pre>
+<pre class="r"><code>Fscore_matrix %&gt;%
+ group_by(Batch) %&gt;%
+  heatmap(.row = method, 
+        .column = HTO, 
+        .value = Fscore,
+        column_title = &quot;F-score - BAL data&quot;,
+        cluster_rows = TRUE,
+        row_names_gp = gpar(fontsize = 10),
+        show_row_dend = FALSE,
+        row_names_side = &quot;left&quot;, 
+        row_title = &quot;&quot;,
+        cluster_columns = FALSE,
+        column_names_gp = gpar(fontsize = 10),
+        palette_value = plasma(3)) %&gt;% 
+  wrap_heatmap() -&gt; p1</code></pre>
+<pre><code>tidyHeatmap says: (once per session) from release 1.7.0 the scaling is set to &quot;none&quot; by default. Please use scale = &quot;row&quot;, &quot;column&quot; or &quot;both&quot; to apply scaling</code></pre>
+<pre class="r"><code>p1</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-45-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#ggsave(here(&quot;paper_latex&quot;, &quot;figures&quot;, &quot;fscore_heatmap.png&quot;),
+#       p1,
+#       device = &quot;png&quot;,
+#       width = 8, height = 5,
+#       units = &quot;in&quot;,
+#       dpi = 350
+#      )</code></pre>
+<p>Get numerical values out.</p>
+<pre class="r"><code>Fscore_matrix_batch1[Fscore_matrix_batch1$HTO == &quot;Mean&quot;, ]</code></pre>
+<pre><code># A tibble: 0 × 4
+# ℹ 4 variables: HTO &lt;chr&gt;, method &lt;chr&gt;, Fscore &lt;dbl&gt;, Batch &lt;chr&gt;</code></pre>
+<pre class="r"><code>Fscore_matrix_batch2[Fscore_matrix_batch2$HTO == &quot;Mean&quot;, ]</code></pre>
+<pre><code># A tibble: 0 × 4
+# ℹ 4 variables: HTO &lt;chr&gt;, method &lt;chr&gt;, Fscore &lt;dbl&gt;, Batch &lt;chr&gt;</code></pre>
+<pre class="r"><code>Fscore_matrix_batch3[Fscore_matrix_batch3$HTO == &quot;Mean&quot;, ]</code></pre>
+<pre><code># A tibble: 0 × 4
+# ℹ 4 variables: HTO &lt;chr&gt;, method &lt;chr&gt;, Fscore &lt;dbl&gt;, Batch &lt;chr&gt;</code></pre>
+</div>
+<div id="doublets-to-singlets" class="section level3">
+<h3>Doublets to singlets</h3>
+<p>Also worried about whether any of these methods are assigning genetic
+doublets as singlets. Going to look at the fraction of genetic doublets
+that get assigned to each of the possible HTO categories.</p>
+<pre class="r"><code>batch1_doublets &lt;- seu1[, seu1$genetic_donor == &quot;Doublet&quot;]
+batch2_doublets &lt;- seu2[, seu2$genetic_donor == &quot;Doublet&quot;]
+batch3_doublets &lt;- seu3[, seu3$genetic_donor == &quot;Doublet&quot;]</code></pre>
+<pre class="r"><code>batch1_doublet_doublet &lt;- NULL
+batch1_doublet_negative &lt;- NULL
+batch1_doublet_singlet &lt;- NULL
+
+batch2_doublet_doublet &lt;- NULL
+batch2_doublet_negative &lt;- NULL
+batch2_doublet_singlet &lt;- NULL
+
+batch3_doublet_doublet &lt;- NULL
+batch3_doublet_negative &lt;- NULL
+batch3_doublet_singlet &lt;- NULL
+
+for (method in method_calls) {
+  batch1_doublet_doublet &lt;- c(batch1_doublet_doublet, sum(seu1$genetic_donor == &quot;Doublet&quot; &amp; seu1[[method]] == &quot;Doublet&quot;) / sum(seu1$genetic_donor == &quot;Doublet&quot;))
+  batch1_doublet_negative &lt;- c(batch1_doublet_negative, sum(seu1$genetic_donor == &quot;Doublet&quot; &amp; seu1[[method]] == &quot;Negative&quot;) / sum(seu1$genetic_donor == &quot;Doublet&quot;))
+  batch1_doublet_singlet &lt;- c(batch1_doublet_singlet, sum(seu1$genetic_donor == &quot;Doublet&quot; &amp; Reduce(&quot;|&quot;, lapply(HTO_list_batch1[1:8], function(x) seu1[[method]] == x))) / sum(seu1$genetic_donor == &quot;Doublet&quot;))
+  
+  batch2_doublet_doublet &lt;- c(batch2_doublet_doublet, sum(seu2$genetic_donor == &quot;Doublet&quot; &amp; seu2[[method]] == &quot;Doublet&quot;) / sum(seu2$genetic_donor == &quot;Doublet&quot;))
+  batch2_doublet_negative &lt;- c(batch2_doublet_negative, sum(seu2$genetic_donor == &quot;Doublet&quot; &amp; seu2[[method]] == &quot;Negative&quot;) / sum(seu2$genetic_donor == &quot;Doublet&quot;))
+  batch2_doublet_singlet &lt;- c(batch2_doublet_singlet, sum(seu2$genetic_donor == &quot;Doublet&quot; &amp; Reduce(&quot;|&quot;, lapply(HTO_list_batch2[1:8], function(x) seu2[[method]] == x))) / sum(seu2$genetic_donor == &quot;Doublet&quot;))
+  
+  batch3_doublet_doublet &lt;- c(batch3_doublet_doublet, sum(seu3$genetic_donor == &quot;Doublet&quot; &amp; seu3[[method]] == &quot;Doublet&quot;) / sum(seu3$genetic_donor == &quot;Doublet&quot;))
+  batch3_doublet_negative &lt;- c(batch3_doublet_negative, sum(seu3$genetic_donor == &quot;Doublet&quot; &amp; seu3[[method]] == &quot;Negative&quot;) / sum(seu3$genetic_donor == &quot;Doublet&quot;))
+  batch3_doublet_singlet &lt;- c(batch3_doublet_singlet, sum(seu3$genetic_donor == &quot;Doublet&quot; &amp; Reduce(&quot;|&quot;, lapply(HTO_list_batch3[1:8], function(x) seu3[[method]] == x))) / sum(seu3$genetic_donor == &quot;Doublet&quot;))
+}
+
+names(batch1_doublet_doublet) &lt;- method_calls
+names(batch1_doublet_negative) &lt;- method_calls
+names(batch1_doublet_singlet) &lt;- method_calls
+
+names(batch2_doublet_doublet) &lt;- method_calls
+names(batch2_doublet_negative) &lt;- method_calls
+names(batch2_doublet_singlet) &lt;- method_calls
+
+names(batch3_doublet_doublet) &lt;- method_calls
+names(batch3_doublet_negative) &lt;- method_calls
+names(batch3_doublet_singlet) &lt;- method_calls</code></pre>
+<pre class="r"><code>batch1_doublet_assignments &lt;- data.frame(&quot;method&quot; = c(&quot;hashedDrops&quot;, 
+                                                      &quot;hashedDrops (default)&quot;, 
+                                                      &quot;HashSolo&quot;, 
+                                                      &quot;HTODemux&quot;,
+                                                      &quot;GMM-Demux&quot;, 
+                                                      &quot;deMULTIplex&quot;, 
+                                                      &quot;BFF_raw&quot;,
+                                                      &quot;BFF_cluster&quot;, 
+                                                      &quot;demuxmix&quot;),
+                            &quot;Doublet&quot; = batch1_doublet_doublet,
+                            &quot;Negative&quot; = batch1_doublet_negative,
+                            &quot;Singlet&quot; = batch1_doublet_singlet) %&gt;%
+  pivot_longer(cols = c(&quot;Doublet&quot;, &quot;Negative&quot;, &quot;Singlet&quot;), 
+               names_to = &quot;assignment&quot;,
+               values_to = &quot;fraction&quot;)
+
+batch2_doublet_assignments &lt;- data.frame(&quot;method&quot; = c(&quot;hashedDrops&quot;, 
+                                                      &quot;hashedDrops (default)&quot;, 
+                                                      &quot;HashSolo&quot;, 
+                                                      &quot;HTODemux&quot;, 
+                                                      &quot;GMM-Demux&quot;, 
+                                                      &quot;deMULTIplex&quot;, 
+                                                      &quot;BFF_raw&quot;,
+                                                      &quot;BFF_cluster&quot;, 
+                                                      &quot;demuxmix&quot;),
+                            &quot;Doublet&quot; = batch2_doublet_doublet,
+                            &quot;Negative&quot; = batch2_doublet_negative,
+                            &quot;Singlet&quot; = batch2_doublet_singlet) %&gt;%
+  pivot_longer(cols = c(&quot;Doublet&quot;, &quot;Negative&quot;, &quot;Singlet&quot;), 
+               names_to = &quot;assignment&quot;,
+               values_to = &quot;fraction&quot;)
+
+batch3_doublet_assignments &lt;- data.frame(&quot;method&quot; = c(&quot;hashedDrops&quot;, 
+                                                      &quot;hashedDrops (default)&quot;, 
+                                                      &quot;HashSolo&quot;, 
+                                                      &quot;HTODemux&quot;,
+                                                      &quot;GMM-Demux&quot;, 
+                                                      &quot;deMULTIplex&quot;, 
+                                                      &quot;BFF_raw&quot;,
+                                                      &quot;BFF_cluster&quot;, 
+                                                      &quot;demuxmix&quot;),
+                            &quot;Doublet&quot; = batch3_doublet_doublet,
+                            &quot;Negative&quot; = batch3_doublet_negative,
+                            &quot;Singlet&quot; = batch3_doublet_singlet) %&gt;%
+  pivot_longer(cols = c(&quot;Doublet&quot;, &quot;Negative&quot;, &quot;Singlet&quot;), 
+               names_to = &quot;assignment&quot;,
+               values_to = &quot;fraction&quot;)</code></pre>
+<pre class="r"><code>doublet_colours &lt;- c(&quot;black&quot;, &quot;gray60&quot;, &quot;firebrick1&quot;)
+
+p1 &lt;- ggplot(batch1_doublet_assignments %&gt;%
+               mutate(method = factor(method, levels = c(&quot;BFF_cluster&quot;, &quot;BFF_raw&quot;, &quot;hashedDrops (default)&quot;, &quot;deMULTIplex&quot;, &quot;HashSolo&quot;, &quot;GMM-Demux&quot;, &quot;HTODemux&quot;, &quot;demuxmix&quot;, &quot;hashedDrops&quot;)))) + 
+  geom_bar(aes(x = method, y = fraction, fill = assignment),
+           stat = &quot;identity&quot;) +
+  ggtitle(&quot;Batch 1 (2041 doublets)&quot;) +
+  ylim(0, 1) +
+  scale_fill_manual(values = doublet_colours) +
+  theme(axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(size = 10)
+        ) + NoLegend() + coord_flip()
+
+p2 &lt;- ggplot(batch2_doublet_assignments %&gt;%
+               mutate(method = factor(method, levels = c(&quot;BFF_cluster&quot;, &quot;BFF_raw&quot;, &quot;hashedDrops (default)&quot;, &quot;deMULTIplex&quot;, &quot;HashSolo&quot;, &quot;GMM-Demux&quot;, &quot;HTODemux&quot;, &quot;demuxmix&quot;, &quot;hashedDrops&quot;)))) + 
+  geom_bar(aes(x = method, y = fraction, fill = assignment),
+           stat = &quot;identity&quot;) +
+  ggtitle(&quot;Batch 2 (6463 doublets)&quot;) +
+  ylim(0, 1) +
+  scale_fill_manual(values = doublet_colours) +
+  theme(axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        plot.title = element_text(size = 10)) + NoLegend() + coord_flip() 
+
+p3 &lt;- ggplot(batch3_doublet_assignments %&gt;%
+               mutate(method = factor(method, levels = c(&quot;BFF_cluster&quot;, &quot;BFF_raw&quot;, &quot;hashedDrops (default)&quot;, &quot;deMULTIplex&quot;, &quot;HashSolo&quot;, &quot;GMM-Demux&quot;, &quot;HTODemux&quot;, &quot;demuxmix&quot;, &quot;hashedDrops&quot;)))) + 
+  geom_bar(aes(x = method, y = fraction, fill = assignment),
+           stat = &quot;identity&quot;) +
+  ggtitle(&quot;Batch 3 (11004 doublets)&quot;) +
+  ylim(0, 1) +
+  scale_fill_manual(values = doublet_colours) +
+  theme(axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(size = 10)) + coord_flip()
+
+p1 | p2 | p3</code></pre>
+<p><img src="figure/BAL_analysis.Rmd/unnamed-chunk-51-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#ggsave(&quot;doublet_assignments.png&quot;,
+#       plot = p1 | p2 | p3,
+#       device = &quot;png&quot;,
+#       path = here(&quot;paper_latex&quot;, &quot;figures&quot;),
+#       width = 8, height = 5,
+#       units = &quot;in&quot;,
+#       dpi = 350)</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.2.2 (2022-10-31)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS Ventura 13.0.1
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] grid      stats4    stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] Matrix_1.5-4                viridis_0.6.3              
+ [3] viridisLite_0.4.2           tidyHeatmap_1.8.1          
+ [5] ComplexHeatmap_2.14.0       demuxmix_1.0.0             
+ [7] RColorBrewer_1.1-3          cellhashR_1.0.3            
+ [9] dittoSeq_1.10.0             speckle_0.99.7             
+[11] pheatmap_1.0.12             SeuratObject_4.1.3         
+[13] Seurat_4.3.0                scater_1.26.1              
+[15] scuttle_1.8.4               lubridate_1.9.2            
+[17] forcats_1.0.0               stringr_1.5.0              
+[19] purrr_1.0.1                 readr_2.1.4                
+[21] tidyr_1.3.0                 tibble_3.2.1               
+[23] tidyverse_2.0.0             DropletUtils_1.18.1        
+[25] SingleCellExperiment_1.20.1 SummarizedExperiment_1.28.0
+[27] Biobase_2.58.0              GenomicRanges_1.50.2       
+[29] GenomeInfoDb_1.34.9         IRanges_2.32.0             
+[31] S4Vectors_0.36.2            BiocGenerics_0.44.0        
+[33] MatrixGenerics_1.10.0       matrixStats_0.63.0         
+[35] patchwork_1.1.2             cowplot_1.1.1              
+[37] ggplot2_3.4.2               janitor_2.2.0              
+[39] dplyr_1.1.2                 BiocStyle_2.26.0           
+[41] here_1.0.1                  workflowr_1.7.0            
+
+loaded via a namespace (and not attached):
+  [1] scattermore_1.0           R.methodsS3_1.8.2        
+  [3] knitr_1.42                irlba_2.3.5.1            
+  [5] DelayedArray_0.24.0       R.utils_2.12.2           
+  [7] data.table_1.14.8         RCurl_1.98-1.12          
+  [9] doParallel_1.0.17         generics_0.1.3           
+ [11] preprocessCore_1.61.0     ScaledMatrix_1.6.0       
+ [13] callr_3.7.3               RANN_2.6.1               
+ [15] future_1.32.0             tzdb_0.3.0               
+ [17] spatstat.data_3.0-1       httpuv_1.6.11            
+ [19] xfun_0.39                 hms_1.1.3                
+ [21] jquerylib_0.1.4           evaluate_0.21            
+ [23] promises_1.2.0.1          fansi_1.0.4              
+ [25] dendextend_1.17.1         igraph_1.4.2             
+ [27] DBI_1.1.3                 htmlwidgets_1.6.2        
+ [29] spatstat.geom_3.2-1       ellipsis_0.3.2           
+ [31] bookdown_0.34             deldir_1.0-6             
+ [33] sparseMatrixStats_1.10.0  vctrs_0.6.2              
+ [35] Cairo_1.6-0               ROCR_1.0-11              
+ [37] abind_1.4-5               cachem_1.0.8             
+ [39] withr_2.5.0               ggforce_0.4.1            
+ [41] progressr_0.13.0          sctransform_0.3.5        
+ [43] goftest_1.2-3             cluster_2.1.4            
+ [45] lazyeval_0.2.2            crayon_1.5.2             
+ [47] spatstat.explore_3.2-1    edgeR_3.40.2             
+ [49] pkgconfig_2.0.3           labeling_0.4.2           
+ [51] tweenr_2.0.2              nlme_3.1-162             
+ [53] vipor_0.4.5               rlang_1.1.1              
+ [55] globals_0.16.2            lifecycle_1.0.3          
+ [57] miniUI_0.1.1.1            rsvd_1.0.5               
+ [59] ggrastr_1.0.1             rprojroot_2.0.3          
+ [61] polyclip_1.10-4           lmtest_0.9-40            
+ [63] Rhdf5lib_1.20.0           zoo_1.8-12               
+ [65] beeswarm_0.4.0            whisker_0.4.1            
+ [67] ggridges_0.5.4            GlobalOptions_0.1.2      
+ [69] processx_3.8.1            png_0.1-8                
+ [71] rjson_0.2.21              bitops_1.0-7             
+ [73] getPass_0.2-2             R.oo_1.25.0              
+ [75] KernSmooth_2.23-21        rhdf5filters_1.10.1      
+ [77] ggExtra_0.10.0            DelayedMatrixStats_1.20.0
+ [79] shape_1.4.6               parallelly_1.35.0        
+ [81] spatstat.random_3.1-5     beachmat_2.14.2          
+ [83] scales_1.2.1              magrittr_2.0.3           
+ [85] plyr_1.8.8                ica_1.0-3                
+ [87] zlibbioc_1.44.0           compiler_4.2.2           
+ [89] dqrng_0.3.0               clue_0.3-64              
+ [91] fitdistrplus_1.1-11       snakecase_0.11.0         
+ [93] cli_3.6.1                 XVector_0.38.0           
+ [95] listenv_0.9.0             pbapply_1.7-0            
+ [97] ps_1.7.5                  MASS_7.3-60              
+ [99] tidyselect_1.2.0          stringi_1.7.12           
+[101] highr_0.10                yaml_2.3.7               
+[103] BiocSingular_1.14.0       locfit_1.5-9.7           
+[105] ggrepel_0.9.3             sass_0.4.6               
+[107] tools_4.2.2               timechange_0.2.0         
+[109] future.apply_1.10.0       parallel_4.2.2           
+[111] circlize_0.4.15           rstudioapi_0.14          
+[113] foreach_1.5.2             git2r_0.32.0             
+[115] gridExtra_2.3             rmdformats_1.0.4         
+[117] farver_2.1.1              Rtsne_0.16               
+[119] digest_0.6.31             BiocManager_1.30.20      
+[121] shiny_1.7.4               Rcpp_1.0.10              
+[123] egg_0.4.5                 later_1.3.1              
+[125] RcppAnnoy_0.0.20          httr_1.4.6               
+[127] naturalsort_0.1.3         colorspace_2.1-0         
+[129] fs_1.6.2                  tensor_1.5               
+[131] reticulate_1.28           splines_4.2.2            
+[133] uwot_0.1.14               spatstat.utils_3.0-3     
+[135] sp_1.6-0                  plotly_4.10.1            
+[137] xtable_1.8-4              jsonlite_1.8.4           
+[139] R6_2.5.1                  pillar_1.9.0             
+[141] htmltools_0.5.5           mime_0.12                
+[143] glue_1.6.2                fastmap_1.1.1            
+[145] BiocParallel_1.32.6       BiocNeighbors_1.16.0     
+[147] codetools_0.2-19          utf8_1.2.3               
+[149] lattice_0.21-8            bslib_0.4.2              
+[151] spatstat.sparse_3.0-1     ggbeeswarm_0.7.2         
+[153] leiden_0.4.3              magick_2.7.4             
+[155] survival_3.5-5            limma_3.54.2             
+[157] rmarkdown_2.21            munsell_0.5.0            
+[159] GetoptLong_1.0.5          rhdf5_2.42.1             
+[161] GenomeInfoDbData_1.2.9    iterators_1.0.14         
+[163] HDF5Array_1.26.0          reshape2_1.4.4           
+[165] gtable_0.3.3             </code></pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
